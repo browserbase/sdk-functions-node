@@ -4,16 +4,23 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "eslint": "eslint ./src",
+    "eslint:fix": "eslint --fix ./src",
+    "lint": "pnpm run eslint && pnpm run typecheck",
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.12.1",
   "devDependencies": {
+    "@eslint/js": "^9.35.0",
     "@types/node": "^24.3.1",
+    "eslint": "^9.35.0",
+    "globals": "^16.3.0",
+    "jiti": "^2.5.1",
     "tsx": "^4.20.5",
-    "typescript": "^5.9.2"
-  },
-  "dependencies": {}
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.42.0"
+  }
 }
