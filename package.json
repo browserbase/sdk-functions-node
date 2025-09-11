@@ -3,13 +3,32 @@
   "version": "1.0.0",
   "description": "",
   "type": "module",
-  "main": "index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "sideEffects": [
+    "./dist/index.js"
+  ],
   "scripts": {
+    "build": "$npm_execpath eslint && rm -rf dist && tsup",
+    "build:tests": "tsc --project tsconfig.test.json",
     "eslint": "eslint ./src",
     "eslint:fix": "eslint --fix ./src",
-    "lint": "$npm_execpath run eslint && $npm_execpath run  && $npm_execpath run typecheck",
+    "lint": "$npm_execpath run eslint && $npm_execpath run prettier && $npm_execpath run typecheck",
     "prettier": "prettier . --check --cache",
     "prettier:fix": "prettier . --write --cache",
+    "test": "$npm_execpath build:tests && node --test dist-test/**/*.test.js",
+    "test:only": "$npm_execpath build:tests && node --test-only --test dist-test/**/*.test.js",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [],
@@ -20,13 +39,18 @@
     "@eslint/js": "^9.35.0",
     "@types/node": "^24.3.1",
     "eslint": "^9.35.0",
-    "eslint-plugin-no-relative-import-paths": "^1.6.1",
     "globals": "^16.3.0",
     "jiti": "^2.5.1",
     "prettier": "3.6.2",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "tsup": "^8.5.0",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.42.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@browserbasehq/sdk": "^2.6.0",
+    "zod": "^4.1.5"
+  }
 }

@@ -3,11 +3,6 @@
     // File Layout
     "rootDir": "./src",
     "outDir": "./dist",
-    "baseUrl": "./src",
-    "paths": {
-      "@/*": ["./*"],
-      "@types/*": ["./types/*"]
-    },
 
     // Environment Settings
     "module": "nodenext",
@@ -39,5 +34,7 @@
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true
-  }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "tests", "eslint.config.mts"]
 }
