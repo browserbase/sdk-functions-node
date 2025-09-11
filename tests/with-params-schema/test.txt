@@ -1,0 +1,33 @@
+{
+  "parametersSchema": {
+    "~standard": {
+      "vendor": "zod",
+      "version": 1
+    },
+    "def": {
+      "type": "object",
+      "shape": {
+        "data": {
+          "~standard": {
+            "vendor": "zod",
+            "version": 1
+          },
+          "def": {
+            "type": "number",
+            "checks": []
+          },
+          "type": "number",
+          "minValue": null,
+          "maxValue": null,
+          "isInt": false,
+          "isFinite": true,
+          "format": null
+        }
+      }
+    },
+    "type": "object"
+  },
+  "sessionConfig": {
+    "timeout": 900
+  }
+}
