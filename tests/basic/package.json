@@ -1,0 +1,21 @@
+{
+  "name": "basic",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "clean": "rm -rf .browserbase",
+    "introspect": "BB_FUNCTIONS_PHASE=introspect $npm_execpath tsx index.ts",
+    "test": "$npm_execpath run clean && $npm_execpath run introspect && ../compare-expected.sh expected .browserbase/functions/manifests"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.12.1",
+  "dependencies": {
+    "sdk-functions-node": "link:../.."
+  },
+  "devDependencies": {
+    "tsx": "^4.20.5"
+  }
+}
