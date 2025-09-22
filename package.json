@@ -20,7 +20,7 @@
     "./dist/index.js"
   ],
   "scripts": {
-    "build": "$npm_execpath eslint && rm -rf dist && tsup",
+    "build": "$npm_execpath run eslint && rm -rf dist && tsup",
     "build:tests": "tsc --project tsconfig.test.json",
     "eslint": "eslint ./src",
     "eslint:fix": "eslint --fix ./src",
