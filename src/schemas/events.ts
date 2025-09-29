@@ -3,7 +3,7 @@ import { FunctionInvocationContext } from "./invocation.js";
 
 export const RuntimeEventPayload = z.object({
   functionName: z.string(),
-  params: z.union([z.object(), z.null()]),
+  params: z.any(),
   context: FunctionInvocationContext,
 });
 
