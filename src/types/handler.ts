@@ -5,8 +5,8 @@ import type { JSONSchemaInput } from "./schema.js";
 import type z from "zod";
 
 export type FunctionHandler<S extends JSONSchemaInput> = (
-  params: S extends JSONSchemaInput ? z.infer<S> : unknown,
   context: FunctionInvocationContext,
+  params: S extends JSONSchemaInput ? z.infer<S> : unknown,
 ) =>
   | Promise<FunctionHandlerCallbackReturnValue>
   | FunctionHandlerCallbackReturnValue;

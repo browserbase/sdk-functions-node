@@ -3,7 +3,7 @@ import z from "zod";
 
 defineFn(
   "withParamsSchema",
-  async (params) => {
+  async (_ctx, params) => {
     const x = params.data;
     const returnValue = x * 2;
     return { value: returnValue };
