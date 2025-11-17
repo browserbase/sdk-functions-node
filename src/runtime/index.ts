@@ -87,14 +87,14 @@ export class RuntimeClient implements IRuntimeClient {
 
   public async handleSuccess(
     requestId: string,
-    payload: RuntimeEventPayload,
+    result: FunctionHandlerCallbackReturnValue,
   ): Promise<void> {
     const response = await fetch(
       `${this.baseUrl}/invocation/${encodeURIComponent(requestId)}/response`,
       {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(result),
       },
     );
 

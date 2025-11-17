@@ -56,7 +56,7 @@ export class FunctionRegistry implements IFunctionRegistry {
       );
     }
 
-    const handlerResult = await foundDefinition.handler(params, context);
+    const handlerResult = await foundDefinition.handler(context, params);
 
     // TODO: Remove when we have a better structured logging story
     console.log("handlerResult", handlerResult);
