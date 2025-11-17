@@ -9,10 +9,31 @@ export interface ProcessManagerOptions {
 }
 
 /**
+ * Interface for managing the lifecycle of the user's function process.
+ * Spawns tsx watch to enable hot reloading during development.
+ */
+export interface IProcessManager {
+  /**
+   * Start the user's function process using tsx watch.
+   */
+  start(): Promise<void>;
+
+  /**
+   * Stop the user's function process.
+   */
+  stop(): Promise<void>;
+
+  /**
+   * Check if the process is currently running.
+   */
+  isRunning(): boolean;
+}
+
+/**
  * Manages the lifecycle of the user's function process.
  * Spawns tsx watch to enable hot reloading during development.
  */
-export class ProcessManager {
+export class ProcessManager implements IProcessManager {
   private process: ChildProcess | null = null;
   private entrypoint: string;
   private runtimeApiUrl: string;

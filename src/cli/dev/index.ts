@@ -2,6 +2,7 @@ import chalk from "chalk";
 import { startServer } from "./server.js";
 import { InvocationBridge } from "./bridge.js";
 import { ProcessManager } from "./process.js";
+import { RemoteBrowserManager } from "./browser-manager.js";
 import "dotenv/config";
 
 export interface DevServerOptions {
@@ -33,6 +34,10 @@ export async function startDevServer(options: DevServerOptions): Promise<void> {
   // Create the invocation bridge
   const bridge = new InvocationBridge(verbose);
 
+  // Create the browser manager
+  const browserManager = new RemoteBrowserManager();
+  await browserManager.initialize();
+
   // Create the process manager
   const processManager = new ProcessManager({
     entrypoint,
@@ -49,7 +54,7 @@ export async function startDevServer(options: DevServerOptions): Promise<void> {
       port,
       host,
       bridge,
-      verbose,
+      browserManager,
     });
 
     console.log(

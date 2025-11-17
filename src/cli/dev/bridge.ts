@@ -31,10 +31,68 @@ export interface RuntimeError {
 }
 
 /**
+ * Interface for managing the lifecycle of invocations, bridging between external invoke requests
+ * and the function runtime's polling mechanism.
+ */
+export interface IInvocationBridge {
+  /**
+   * Set a callback to be called when a session should be cleaned up.
+   */
+  setSessionCleanupCallback(callback: (sessionId: string) => Promise<void>): void;
+
+  /**
+   * Hold a connection from the runtime waiting for the next invocation.
+   * This corresponds to the SDK calling GET /invocation/next.
+   */
+  holdNextConnection(response: ServerResponse): void;
+
+  /**
+   * Trigger an invocation by completing the held /next connection with invoke data
+   * and holding the invoke connection until the function completes.
+   */
+  triggerInvocation(
+    functionName: string,
+    params: unknown,
+    context: FunctionInvocationContext,
+    invokeResponse: ServerResponse,
+  ): boolean;
+
+  /**
+   * Complete the held invoke connection with a successful response.
+   */
+  completeWithSuccess(requestId: string, result: unknown): boolean;
+
+  /**
+   * Complete the held invoke connection with an error response.
+   */
+  completeWithError(requestId: string, error: RuntimeError): boolean;
+
+  /**
+   * Check if the bridge is ready to accept invocations.
+   */
+  isReady(): boolean;
+
+  /**
+   * Check if there's an active invocation.
+   */
+  hasActiveInvocation(): boolean;
+
+  /**
+   * Get the current request ID if there's an active invocation.
+   */
+  getCurrentRequestId(): string | null;
+
+  /**
+   * Check if the runtime has connected at least once.
+   */
+  isRuntimeConnected(): boolean;
+}
+
+/**
  * Manages the lifecycle of invocations, bridging between external invoke requests
  * and the function runtime's polling mechanism.
  */
-export class InvocationBridge {
+export class InvocationBridge implements IInvocationBridge {
   private nextConnection: HeldConnection | null = null;
   private invokeConnection: HeldConnection | null = null;
   private currentRequestId: string | null = null;

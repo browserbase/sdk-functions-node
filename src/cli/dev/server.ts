@@ -1,25 +1,23 @@
 import { createServer, Server, IncomingMessage, ServerResponse } from "http";
 import chalk from "chalk";
-import { InvocationBridge } from "./bridge.js";
-import {
-  handleInvocationNext,
-  handleFunctionInvoke,
-  handleInvocationResponse,
-  handleInvocationError,
-  cleanupSession,
-} from "./handlers.js";
+import { type IInvocationBridge } from "./bridge.js";
+import { handlers } from "./handlers.js";
+import { type IRemoteBrowserManager } from "./browser-manager.js";
 
 export interface ServerOptions {
   port: number;
   host: string;
-  bridge: InvocationBridge;
+  bridge: IInvocationBridge;
+  browserManager: IRemoteBrowserManager;
 }
 
 export async function startServer(options: ServerOptions): Promise<Server> {
-  const { port, host, bridge } = options;
+  const { port, host, bridge, browserManager } = options;
 
   // Set the session cleanup callback on the bridge
-  bridge.setSessionCleanupCallback(cleanupSession);
+  bridge.setSessionCleanupCallback((sessionId: string) =>
+    handlers.cleanupSession(sessionId, browserManager)
+  );
 
   const server = createServer(
     async (req: IncomingMessage, res: ServerResponse) => {
@@ -47,7 +45,7 @@ export async function startServer(options: ServerOptions): Promise<Server> {
           method === "GET" &&
           path === "/2018-06-01/runtime/invocation/next"
         ) {
-          await handleInvocationNext(req, res, bridge);
+          await handlers.handleInvocationNext(req, res, bridge);
           return;
         }
 
@@ -55,7 +53,7 @@ export async function startServer(options: ServerOptions): Promise<Server> {
         const invokeMatch = path.match(/^\/v1\/functions\/([^/]+)\/invoke$/);
         if (method === "POST" && invokeMatch && invokeMatch[1]) {
           const functionName = invokeMatch[1];
-          await handleFunctionInvoke(req, res, functionName, bridge);
+          await handlers.handleFunctionInvoke(req, res, functionName, bridge, browserManager);
           return;
         }
 
@@ -65,7 +63,7 @@ export async function startServer(options: ServerOptions): Promise<Server> {
         );
         if (method === "POST" && responseMatch && responseMatch[1]) {
           const requestId = responseMatch[1];
-          await handleInvocationResponse(req, res, requestId, bridge);
+          await handlers.handleInvocationResponse(req, res, requestId, bridge);
           return;
         }
 
@@ -75,7 +73,7 @@ export async function startServer(options: ServerOptions): Promise<Server> {
         );
         if (method === "POST" && errorMatch && errorMatch[1]) {
           const requestId = errorMatch[1];
-          await handleInvocationError(req, res, requestId, bridge);
+          await handlers.handleInvocationError(req, res, requestId, bridge);
           return;
         }
 
