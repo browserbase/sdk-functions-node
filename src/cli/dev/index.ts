@@ -2,6 +2,7 @@ import chalk from "chalk";
 import { startServer } from "./server.js";
 import { InvocationBridge } from "./bridge.js";
 import { ProcessManager } from "./process.js";
+import "dotenv/config";
 
 export interface DevServerOptions {
   entrypoint: string;
@@ -108,4 +109,3 @@ export async function startDevServer(options: DevServerOptions): Promise<void> {
     throw error;
   }
 }
-

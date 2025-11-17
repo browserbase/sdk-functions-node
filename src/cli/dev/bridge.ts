@@ -39,11 +39,22 @@ export class InvocationBridge {
   private invokeConnection: HeldConnection | null = null;
   private currentRequestId: string | null = null;
   private currentFunctionName: string | null = null;
+  private currentSessionId: string | null = null;
+  private sessionCleanupCallback: ((sessionId: string) => Promise<void>) | null = null;
   private verbose: boolean;
   private runtimeConnectedOnce: boolean = false;
 
   constructor(verbose: boolean = false) {
     this.verbose = verbose;
+  }
+
+  /**
+   * Set a callback to be called when a session should be cleaned up.
+   */
+  public setSessionCleanupCallback(
+    callback: (sessionId: string) => Promise<void>,
+  ): void {
+    this.sessionCleanupCallback = callback;
   }
 
   /**
@@ -110,6 +121,7 @@ export class InvocationBridge {
     const requestId = randomUUID();
     this.currentRequestId = requestId;
     this.currentFunctionName = functionName;
+    this.currentSessionId = context.session.id;
 
     // Hold the invoke connection
     this.invokeConnection = {
@@ -180,10 +192,18 @@ export class InvocationBridge {
       ),
     );
 
+    // Clean up session if callback is set
+    if (this.sessionCleanupCallback && this.currentSessionId) {
+      this.sessionCleanupCallback(this.currentSessionId).catch((error) => {
+        console.error(chalk.red("Failed to cleanup session:"), error);
+      });
+    }
+
     // Clean up state
     this.invokeConnection = null;
     this.currentRequestId = null;
     this.currentFunctionName = null;
+    this.currentSessionId = null;
 
     return true;
   }
@@ -232,10 +252,18 @@ export class InvocationBridge {
       ),
     );
 
+    // Clean up session if callback is set
+    if (this.sessionCleanupCallback && this.currentSessionId) {
+      this.sessionCleanupCallback(this.currentSessionId).catch((error) => {
+        console.error(chalk.red("Failed to cleanup session:"), error);
+      });
+    }
+
     // Clean up state
     this.invokeConnection = null;
     this.currentRequestId = null;
     this.currentFunctionName = null;
+    this.currentSessionId = null;
 
     return true;
   }

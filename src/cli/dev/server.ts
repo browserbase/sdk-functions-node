@@ -6,6 +6,7 @@ import {
   handleFunctionInvoke,
   handleInvocationResponse,
   handleInvocationError,
+  cleanupSession,
 } from "./handlers.js";
 
 export interface ServerOptions {
@@ -16,6 +17,9 @@ export interface ServerOptions {
 
 export async function startServer(options: ServerOptions): Promise<Server> {
   const { port, host, bridge } = options;
+
+  // Set the session cleanup callback on the bridge
+  bridge.setSessionCleanupCallback(cleanupSession);
 
   const server = createServer(
     async (req: IncomingMessage, res: ServerResponse) => {

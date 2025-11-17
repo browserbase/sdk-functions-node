@@ -17,7 +17,12 @@ export function defineFn<S extends JSONSchemaInput = unknown>(
 ): void {
   functionsRegistry.register(name, handler, config);
 
-  if (environmentManager.phase === "introspect") {
+  if (
+    // The CLI needs "local" to know how to create sessions with
+    // non-default configurations during the local dev flow
+    environmentManager.phase === "introspect" ||
+    environmentManager.environment === "local"
+  ) {
     const manifestsDir = join(
       process.cwd(),
       ".browserbase",
