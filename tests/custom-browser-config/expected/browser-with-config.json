@@ -1,0 +1,6 @@
+{
+  "name": "browser-with-config",
+  "config": {
+    "sessionConfig": {}
+  }
+}
