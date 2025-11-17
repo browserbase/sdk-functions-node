@@ -1,7 +1,118 @@
 import { IncomingMessage, ServerResponse } from "http";
+import { readFileSync, existsSync, readdirSync } from "fs";
+import { join } from "path";
 import { z } from "zod";
 import chalk from "chalk";
+import Browserbase from "@browserbasehq/sdk";
 import { InvocationBridge, type RuntimeError } from "./bridge.js";
+import type { PersistedFunctionManifest } from "../../types/definition.js";
+import type { JSONSchemaInput } from "../../types/schema.js";
+
+// Initialize Browserbase client (required)
+// Initialize on module load
+const projectId = process.env["BB_PROJECT_ID"] ?? "";
+const apiKey = process.env["BB_API_KEY"] ?? "";
+
+if (!projectId || !apiKey) {
+  console.error(
+    chalk.red("✗ Browserbase credentials not found.\n") +
+      chalk.red(
+        "  Please set BB_PROJECT_ID and BB_API_KEY in your .env file.\n",
+      ) +
+      chalk.gray("  Copy .env.example to .env and fill in your credentials."),
+  );
+  process.exit(1);
+}
+
+// Creating a new Browserbase client is sufficient to assume connection
+const browserbaseClient = new Browserbase({
+  apiKey: apiKey,
+});
+
+console.log(chalk.green("✓ Browserbase client initialized"));
+
+// Cache for function manifests
+const functionManifests = new Map<
+  string,
+  PersistedFunctionManifest<JSONSchemaInput>
+>();
+
+/**
+ * Load function manifests from .browserbase directory
+ */
+function loadFunctionManifests(): void {
+  const manifestsDir = join(
+    process.cwd(),
+    ".browserbase",
+    "functions",
+    "manifests",
+  );
+
+  if (!existsSync(manifestsDir)) {
+    console.log(
+      chalk.yellow("⚠️  No .browserbase/functions/manifests directory found"),
+    );
+    console.log(
+      chalk.gray("  Run your entrypoint file first to generate manifests"),
+    );
+    return;
+  }
+
+  try {
+    const files = readdirSync(manifestsDir);
+    const jsonFiles = files.filter((f) => f.endsWith(".json"));
+
+    for (const file of jsonFiles) {
+      const filePath = join(manifestsDir, file);
+      const content = readFileSync(filePath, "utf-8");
+      const manifest = JSON.parse(
+        content,
+      ) as PersistedFunctionManifest<JSONSchemaInput>;
+
+      functionManifests.set(manifest.name, manifest);
+      console.log(
+        chalk.gray(`  Loaded manifest for function: ${manifest.name}`),
+      );
+    }
+
+    if (functionManifests.size > 0) {
+      console.log(
+        chalk.green(`✓ Loaded ${functionManifests.size} function manifest(s)`),
+      );
+    } else {
+      console.log(
+        chalk.yellow(
+          "⚠️  No function manifests found in .browserbase directory",
+        ),
+      );
+    }
+  } catch (error) {
+    console.error(chalk.red("Failed to load function manifests:"), error);
+  }
+}
+
+// Load manifests on startup
+loadFunctionManifests();
+
+/**
+ * Cleanup a browser session after invocation completes
+ */
+export async function cleanupSession(sessionId: string): Promise<void> {
+  try {
+    console.log(chalk.cyan(`Closing browser session: ${sessionId}...`));
+    await browserbaseClient.sessions.update(sessionId, {
+      projectId,
+      status: "REQUEST_RELEASE",
+    });
+    console.log(chalk.green(`✓ Browser session closed: ${sessionId}`));
+  } catch (error) {
+    // Session might already be closed or expired, log but don't throw
+    console.warn(
+      chalk.yellow(`⚠️  Could not close session ${sessionId}:`),
+      error instanceof Error ? error.message : String(error),
+    );
+  }
+}
 
 /**
  * Parse the JSON body from an incoming request.
@@ -73,17 +184,7 @@ export async function handleFunctionInvoke(
             connectUrl: z.string(),
           }),
         })
-        .optional()
-        .default({
-          invocation: {
-            id: crypto.randomUUID(),
-            region: "local",
-          },
-          session: {
-            id: crypto.randomUUID(),
-            connectUrl: "http://localhost:9001",
-          },
-        }),
+        .optional(),
     });
 
     const validatedData = invokeSchema.parse(body);
@@ -97,11 +198,81 @@ export async function handleFunctionInvoke(
       return;
     }
 
+    // Look up function manifest to get sessionConfig
+    const manifest = functionManifests.get(finalFunctionName);
+
+    if (!manifest) {
+      console.error(
+        chalk.red(
+          `✗ Function "${finalFunctionName}" not found in registry`,
+        ),
+      );
+      console.error(
+        chalk.gray(
+          "  Make sure the function is defined in your entrypoint file",
+        ),
+      );
+      res.writeHead(404, { "Content-Type": "application/json" });
+      res.end(
+        JSON.stringify({
+          error: "Function not found",
+          message: `Function "${finalFunctionName}" not found in registry. Make sure it is defined with defineFn() in your entrypoint file.`,
+        }),
+      );
+      return;
+    }
+
+    // Always create a browser session
+    let session: { id: string; connectUrl: string };
+
+    try {
+      console.log(
+        chalk.cyan(`Creating browser session for ${finalFunctionName}...`),
+      );
+
+      // Create session with function's sessionConfig if available
+      const sessionConfig = manifest?.config?.sessionConfig || {};
+
+      const createdSession = await browserbaseClient.sessions.create({
+        projectId,
+        ...sessionConfig,
+      });
+
+      session = {
+        id: createdSession.id,
+        connectUrl: createdSession.connectUrl,
+      };
+
+      console.log(chalk.green(`✓ Browser session created: ${session.id}`));
+    } catch (error) {
+      console.error(chalk.red("Failed to create browser session:"), error);
+      res.writeHead(500, { "Content-Type": "application/json" });
+      res.end(
+        JSON.stringify({
+          error: "Failed to create browser session",
+          details: error instanceof Error ? error.message : String(error),
+        }),
+      );
+      return;
+    }
+
+    // Build context with the created session
+    const context = validatedData.context || {
+      invocation: {
+        id: crypto.randomUUID(),
+        region: "local",
+      },
+      session: session,
+    };
+
+    // Always use the created session
+    context.session = session;
+
     // Try to trigger the invocation
     const success = bridge.triggerInvocation(
       finalFunctionName,
       validatedData.params,
-      validatedData.context,
+      context,
       res,
     );
 
@@ -235,4 +406,3 @@ export async function handleInvocationError(
     }
   }
 }
-
