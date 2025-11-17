@@ -3,33 +3,10 @@ import { readFileSync, existsSync, readdirSync } from "fs";
 import { join } from "path";
 import { z } from "zod";
 import chalk from "chalk";
-import Browserbase from "@browserbasehq/sdk";
-import { InvocationBridge, type RuntimeError } from "./bridge.js";
+import { type IInvocationBridge, type RuntimeError } from "./bridge.js";
+import { type IRemoteBrowserManager } from "./browser-manager.js";
 import type { PersistedFunctionManifest } from "../../types/definition.js";
 import type { JSONSchemaInput } from "../../types/schema.js";
-
-// Initialize Browserbase client (required)
-// Initialize on module load
-const projectId = process.env["BB_PROJECT_ID"] ?? "";
-const apiKey = process.env["BB_API_KEY"] ?? "";
-
-if (!projectId || !apiKey) {
-  console.error(
-    chalk.red("✗ Browserbase credentials not found.\n") +
-      chalk.red(
-        "  Please set BB_PROJECT_ID and BB_API_KEY in your .env file.\n",
-      ) +
-      chalk.gray("  Copy .env.example to .env and fill in your credentials."),
-  );
-  process.exit(1);
-}
-
-// Creating a new Browserbase client is sufficient to assume connection
-const browserbaseClient = new Browserbase({
-  apiKey: apiKey,
-});
-
-console.log(chalk.green("✓ Browserbase client initialized"));
 
 // Cache for function manifests
 const functionManifests = new Map<
@@ -95,23 +72,65 @@ function loadFunctionManifests(): void {
 loadFunctionManifests();
 
 /**
+ * Interface for request handlers
+ */
+export interface IHandlers {
+  /**
+   * Cleanup a browser session after invocation completes
+   */
+  cleanupSession: (sessionId: string, browserManager: IRemoteBrowserManager) => Promise<void>;
+
+  /**
+   * Handle GET /2018-06-01/runtime/invocation/next
+   * This endpoint is called by the runtime to get the next invocation.
+   * We hold the connection until an invocation arrives.
+   */
+  handleInvocationNext: (
+    req: IncomingMessage,
+    res: ServerResponse,
+    bridge: IInvocationBridge,
+  ) => Promise<void>;
+
+  /**
+   * Handle POST /v1/functions/:name/invoke
+   * This endpoint is called by external clients to invoke a function.
+   */
+  handleFunctionInvoke: (
+    req: IncomingMessage,
+    res: ServerResponse,
+    functionName: string,
+    bridge: IInvocationBridge,
+    browserManager: IRemoteBrowserManager,
+  ) => Promise<void>;
+
+  /**
+   * Handle POST /2018-06-01/runtime/invocation/:requestId/response
+   * This endpoint is called by the runtime when a function completes successfully.
+   */
+  handleInvocationResponse: (
+    req: IncomingMessage,
+    res: ServerResponse,
+    requestId: string,
+    bridge: IInvocationBridge,
+  ) => Promise<void>;
+
+  /**
+   * Handle POST /2018-06-01/runtime/invocation/:requestId/error
+   * This endpoint is called by the runtime when a function fails.
+   */
+  handleInvocationError: (
+    req: IncomingMessage,
+    res: ServerResponse,
+    requestId: string,
+    bridge: IInvocationBridge,
+  ) => Promise<void>;
+}
+
+/**
  * Cleanup a browser session after invocation completes
  */
-export async function cleanupSession(sessionId: string): Promise<void> {
-  try {
-    console.log(chalk.cyan(`Closing browser session: ${sessionId}...`));
-    await browserbaseClient.sessions.update(sessionId, {
-      projectId,
-      status: "REQUEST_RELEASE",
-    });
-    console.log(chalk.green(`✓ Browser session closed: ${sessionId}`));
-  } catch (error) {
-    // Session might already be closed or expired, log but don't throw
-    console.warn(
-      chalk.yellow(`⚠️  Could not close session ${sessionId}:`),
-      error instanceof Error ? error.message : String(error),
-    );
-  }
+async function cleanupSession(sessionId: string, browserManager: IRemoteBrowserManager): Promise<void> {
+  await browserManager.closeSession(sessionId);
 }
 
 /**
@@ -143,10 +162,10 @@ async function parseJsonBody(req: IncomingMessage): Promise<unknown> {
  * This endpoint is called by the runtime to get the next invocation.
  * We hold the connection until an invocation arrives.
  */
-export async function handleInvocationNext(
+async function handleInvocationNext(
   _req: IncomingMessage,
   res: ServerResponse,
-  bridge: InvocationBridge,
+  bridge: IInvocationBridge,
 ): Promise<void> {
   // Hold the connection in the bridge
   bridge.holdNextConnection(res);
@@ -159,11 +178,12 @@ export async function handleInvocationNext(
  * Handle POST /v1/functions/:name/invoke
  * This endpoint is called by external clients to invoke a function.
  */
-export async function handleFunctionInvoke(
+async function handleFunctionInvoke(
   req: IncomingMessage,
   res: ServerResponse,
   functionName: string,
-  bridge: InvocationBridge,
+  bridge: IInvocationBridge,
+  browserManager: IRemoteBrowserManager,
 ): Promise<void> {
   try {
     // Parse and validate the request body
@@ -233,17 +253,7 @@ export async function handleFunctionInvoke(
       // Create session with function's sessionConfig if available
       const sessionConfig = manifest?.config?.sessionConfig || {};
 
-      const createdSession = await browserbaseClient.sessions.create({
-        projectId,
-        ...sessionConfig,
-      });
-
-      session = {
-        id: createdSession.id,
-        connectUrl: createdSession.connectUrl,
-      };
-
-      console.log(chalk.green(`✓ Browser session created: ${session.id}`));
+      session = await browserManager.createSession(sessionConfig);
     } catch (error) {
       console.error(chalk.red("Failed to create browser session:"), error);
       res.writeHead(500, { "Content-Type": "application/json" });
@@ -313,11 +323,11 @@ export async function handleFunctionInvoke(
  * Handle POST /2018-06-01/runtime/invocation/:requestId/response
  * This endpoint is called by the runtime when a function completes successfully.
  */
-export async function handleInvocationResponse(
+async function handleInvocationResponse(
   req: IncomingMessage,
   res: ServerResponse,
   requestId: string,
-  bridge: InvocationBridge,
+  bridge: IInvocationBridge,
 ): Promise<void> {
   try {
     // Parse the response body
@@ -351,11 +361,11 @@ export async function handleInvocationResponse(
  * Handle POST /2018-06-01/runtime/invocation/:requestId/error
  * This endpoint is called by the runtime when a function fails.
  */
-export async function handleInvocationError(
+async function handleInvocationError(
   req: IncomingMessage,
   res: ServerResponse,
   requestId: string,
-  bridge: InvocationBridge,
+  bridge: IInvocationBridge,
 ): Promise<void> {
   try {
     // Parse the error body
@@ -406,3 +416,14 @@ export async function handleInvocationError(
     }
   }
 }
+
+/**
+ * Exported handlers object implementing IHandlers interface
+ */
+export const handlers: IHandlers = {
+  cleanupSession,
+  handleInvocationNext,
+  handleFunctionInvoke,
+  handleInvocationResponse,
+  handleInvocationError,
+};
