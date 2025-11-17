@@ -3,7 +3,9 @@ import { startServer } from "./server.js";
 import { InvocationBridge } from "./bridge.js";
 import { ProcessManager } from "./process.js";
 import { RemoteBrowserManager } from "./browser-manager.js";
+import { DevServerHandlers } from "./handlers/index.js";
 import "dotenv/config";
+import { ManifestStore } from "./handlers/manifest-store.js";
 
 export interface DevServerOptions {
   entrypoint: string;
@@ -38,6 +40,17 @@ export async function startDevServer(options: DevServerOptions): Promise<void> {
   const browserManager = new RemoteBrowserManager();
   await browserManager.initialize();
 
+  // Create and initialize the manifest store
+  const manifestStore = new ManifestStore();
+  manifestStore.loadManifests();
+
+  // Create the handlers with all dependencies
+  const handlers = new DevServerHandlers({
+    bridge,
+    browserManager,
+    manifestStore,
+  });
+
   // Create the process manager
   const processManager = new ProcessManager({
     entrypoint,
@@ -55,6 +68,7 @@ export async function startDevServer(options: DevServerOptions): Promise<void> {
       host,
       bridge,
       browserManager,
+      handlers,
     });
 
     console.log(
