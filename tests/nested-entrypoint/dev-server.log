@@ -1,0 +1,19 @@
+Starting Browserbase Functions development server...
+Entrypoint: /Users/ajmcquilkin/GitHub/functions/sdk-functions-node/tests/nested-entrypoint/src/index.ts
+✓ Browserbase client initialized
+⚠️  No /Users/ajmcquilkin/GitHub/functions/sdk-functions-node/tests/nested-entrypoint/.browserbase/functions/manifests directory found
+  Run your entrypoint file first to generate manifests
+(node:79866) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✓ Development server listening on http://127.0.0.1:14123
+Starting runtime process...
+✗ Failed to start runtime: tsx not found 
+  Make sure tsx is installed: npm install -g tsx or pnpm add tsx
+Failed to start: Error: Failed to start runtime process
+    at ProcessManager.start (file:///Users/ajmcquilkin/GitHub/functions/sdk-functions-node/dist/cli.js:1265:13)
+    at async startDevServer (file:///Users/ajmcquilkin/GitHub/functions/sdk-functions-node/dist/cli.js:1348:5)
+    at async Command.<anonymous> (file:///Users/ajmcquilkin/GitHub/functions/sdk-functions-node/dist/cli.js:1425:5)
+Failed to start development server: Error: Failed to start runtime process
+    at ProcessManager.start (file:///Users/ajmcquilkin/GitHub/functions/sdk-functions-node/dist/cli.js:1265:13)
+    at async startDevServer (file:///Users/ajmcquilkin/GitHub/functions/sdk-functions-node/dist/cli.js:1348:5)
+    at async Command.<anonymous> (file:///Users/ajmcquilkin/GitHub/functions/sdk-functions-node/dist/cli.js:1425:5)

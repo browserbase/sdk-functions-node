@@ -15,7 +15,7 @@ const ApiResponseSchema = z.object({
 });
 
 defineFn(
-  "browser-with-config",
+  "nested-entrypoint",
   async (context, params) => {
     const { session } = context;
 

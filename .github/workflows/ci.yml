@@ -113,10 +113,15 @@ jobs:
       fail-fast: false
       matrix:
         node-version: ["24.x"]
-        test-package:
-          - basic
-          - custom-browser-config
-          - with-params-schema
+        include:
+          - test-package: basic
+            entrypoint: index.ts
+          - test-package: custom-browser-config
+            entrypoint: index.ts
+          - test-package: with-params-schema
+            entrypoint: index.ts
+          - test-package: nested-entrypoint
+            entrypoint: src/index.ts
 
     steps:
       - name: Checkout code
@@ -162,6 +167,13 @@ jobs:
         working-directory: tests/${{ matrix.test-package }}
         run: pnpm install --frozen-lockfile
 
+      - name: Make test scripts executable
+        run: |
+          chmod +x tests/*.sh
+
       - name: Run ${{ matrix.test-package }} tests
         working-directory: tests/${{ matrix.test-package }}
-        run: pnpm test
+        env:
+          BB_API_KEY: test-api-key
+          BB_PROJECT_ID: test-project-id
+        run: ../test-all.sh ${{ matrix.entrypoint }}

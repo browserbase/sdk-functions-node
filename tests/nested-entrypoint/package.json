@@ -1,7 +1,7 @@
 {
-  "name": "basic",
+  "name": "nested-entrypoint",
   "version": "1.0.0",
-  "description": "",
+  "description": "Test for functions with custom browser session configuration",
   "main": "index.js",
   "scripts": {},
   "keywords": [],
@@ -9,7 +9,9 @@
   "license": "ISC",
   "packageManager": "pnpm@10.12.1",
   "dependencies": {
-    "@browserbasehq/sdk-functions-node-dev": "link:../.."
+    "playwright-core": "^1.56.1",
+    "@browserbasehq/sdk-functions-node-dev": "link:../..",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "tsx": "^4.20.5"

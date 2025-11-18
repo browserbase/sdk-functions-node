@@ -1,5 +1,5 @@
 {
-  "name": "withParamsSchema",
+  "name": "with-params-schema",
   "config": {
     "parametersSchema": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",

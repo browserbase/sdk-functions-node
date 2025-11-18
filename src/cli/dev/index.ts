@@ -85,6 +85,8 @@ export async function startDevServer(options: DevServerOptions): Promise<void> {
 
     if (bridge.isRuntimeConnected()) {
       console.log(chalk.green("✓ Runtime connected and ready"));
+      // Reload manifests after runtime starts as it may have created them
+      manifestStore.loadManifests();
     } else {
       console.log(chalk.yellow("⚠️  Waiting for runtime to connect..."));
     }
