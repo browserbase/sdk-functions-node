@@ -22,7 +22,7 @@ program
     "<entrypoint>",
     "Path to the TypeScript/JavaScript file that imports all your functions",
   )
-  .option("-p, --port <number>", "Port to listen on", "9001")
+  .option("-p, --port <number>", "Port to listen on", "14113")
   .option("-h, --host <string>", "Host to bind to", "127.0.0.1")
   .action(async (entrypoint, options) => {
     try {

@@ -21,7 +21,7 @@ defineFn(
 
     console.log("Function invoked with browser session:");
     console.log("  Session ID:", session.id);
-    // console.log("  Connect URL:", session.connectUrl);
+    console.log("  Connect URL:", session.connectUrl);
 
     const browser = await chromium.connectOverCDP(session.connectUrl);
     const browserContext = browser.contexts()[0];

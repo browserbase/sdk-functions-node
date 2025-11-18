@@ -30,10 +30,10 @@ describe("Environment Manager", () => {
   });
 
   describe("runtime api field", () => {
-    test("defaults to '127.0.0.1:9001' when AWS_LAMBDA_RUNTIME_API is not set", () => {
+    test("defaults to '127.0.0.1:14113' when AWS_LAMBDA_RUNTIME_API is not set", () => {
       const env: NodeJS.ProcessEnv = {};
       const manager = new EnvironmentManager(env);
-      assert.strictEqual(manager.runtimeApi, "127.0.0.1:9001");
+      assert.strictEqual(manager.runtimeApi, "127.0.0.1:14113");
     });
 
     test("returns custom value when AWS_LAMBDA_RUNTIME_API is set", () => {
@@ -55,7 +55,7 @@ describe("Environment Manager", () => {
     test("handles empty string as undefined and uses default", () => {
       const env: NodeJS.ProcessEnv = { AWS_LAMBDA_RUNTIME_API: "" };
       const manager = new EnvironmentManager(env);
-      assert.strictEqual(manager.runtimeApi, "127.0.0.1:9001");
+      assert.strictEqual(manager.runtimeApi, "127.0.0.1:14113");
     });
   });
 
@@ -96,7 +96,7 @@ describe("Environment Manager", () => {
       const env: NodeJS.ProcessEnv = {};
       const manager = new EnvironmentManager(env);
       assert.strictEqual(manager.environment, "local");
-      assert.strictEqual(manager.runtimeApi, "127.0.0.1:9001");
+      assert.strictEqual(manager.runtimeApi, "127.0.0.1:14113");
       assert.strictEqual(manager.phase, "runtime");
     });
 
