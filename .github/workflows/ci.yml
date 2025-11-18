@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [main]
   pull_request:
-    branches: [ '**' ]
+    branches: ["**"]
   workflow_dispatch:
 
 jobs:
@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: ['20.x', '22.x']
+        node-version: ["20.x", "22.x"]
 
     steps:
       - name: Checkout code
@@ -68,7 +68,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: ['20.x', '22.x']
+        node-version: ["20.x", "22.x"]
 
     steps:
       - name: Checkout code
@@ -113,7 +113,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: ['20.x', '22.x']
+        node-version: ["20.x", "22.x"]
         test-package:
           - basic
           - custom-browser-config
@@ -167,3 +167,4 @@ jobs:
       - name: Run ${{ matrix.test-package }} tests
         working-directory: tests/${{ matrix.test-package }}
         run: pnpm test
+
