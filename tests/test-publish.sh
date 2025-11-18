@@ -57,9 +57,9 @@ print_info "Entrypoint: $ENTRYPOINT"
 cleanup() {
   rm -f publish-output.log test.log .env.test test-ignore.txt
   rm -rf test-gitignore-dir
-  # Restore gitignore if we modified it
-  if [ -f .gitignore.backup ]; then
-    mv .gitignore.backup .gitignore
+  # Remove .gitignore if we created it for testing
+  if [ -f .gitignore ] && [ -f .gitignore.test-marker ]; then
+    rm -f .gitignore .gitignore.test-marker
   fi
   # Restore .env if any test left a backup
   if [ -f .env.backup_test4 ]; then
@@ -187,9 +187,10 @@ fi
 # Test 6: Archive respects .gitignore patterns
 print_info "Test 6: Testing .gitignore respect..."
 
-# Backup existing gitignore
+# Ensure we don't have an existing .gitignore (tests should be isolated)
 if [ -f .gitignore ]; then
-  cp .gitignore .gitignore.backup
+  print_error "Test directory should not have a .gitignore file. Please remove it."
+  exit 1
 fi
 
 # Create test files that should be ignored
@@ -198,18 +199,14 @@ echo "log entry" >test.log
 mkdir -p test-gitignore-dir
 echo "ignored content" >test-gitignore-dir/ignored.txt
 
-# Add patterns to .gitignore
-if [ ! -f .gitignore ]; then
-  echo ".env.test" >.gitignore
-  echo "*.log" >>.gitignore
-  echo "test-gitignore-dir/" >>.gitignore
-else
-  echo "" >>.gitignore
-  echo "# Test patterns (temporary)" >>.gitignore
-  echo ".env.test" >>.gitignore
-  echo "test.log" >>.gitignore
-  echo "test-gitignore-dir/" >>.gitignore
-fi
+# Create a fresh .gitignore for testing
+echo "# Test .gitignore - temporary for test-publish.sh" >.gitignore
+echo ".env.test" >>.gitignore
+echo "*.log" >>.gitignore
+echo "test-gitignore-dir/" >>.gitignore
+
+# Create a marker file to indicate we created this .gitignore for testing
+touch .gitignore.test-marker
 
 # Run publish with dry-run and check output
 if pnpm bb publish "$ENTRYPOINT" --dry-run >publish-output.log 2>&1; then

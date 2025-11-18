@@ -6,3 +6,25 @@ dist-test/
 .env
 .env.*
 !.env.example
+
+# Test suite outputs
+dev-server.log
+dev-response.json
+publish-output.log
+test.log
+.env.test
+test-ignore.txt
+*.test.log
+*.test.json
+!bb.test.json
+.gitignore.test-marker
+test-gitignore-dir/
+
+# Test artifacts
+tests/*/.browserbase/
+tests/*/dev-server.log
+tests/*/dev-response.json
+tests/*/publish-output.log
+tests/*/test.log
+tests/*/.env.test
+tests/*/test-ignore.txt
