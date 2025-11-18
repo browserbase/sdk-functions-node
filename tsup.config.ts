@@ -19,6 +19,9 @@ export default defineConfig([
     minify: false, // true if you want smaller bundles
     splitting: false, // typical for libs
     treeshake: true,
+    minifyIdentifiers: true,
+    minifySyntax: true,
+    minifyWhitespace: true,
   },
   // CLI build
   {
@@ -36,5 +39,8 @@ export default defineConfig([
     define: {
       __CLI_VERSION__: JSON.stringify(packageJson.version),
     },
+    minifyIdentifiers: true,
+    minifySyntax: true,
+    minifyWhitespace: true,
   },
 ]);
