@@ -74,4 +74,27 @@ program
     }
   });
 
+program
+  .command("publish")
+  .description("Publish your Browserbase Function to the cloud")
+  .argument(
+    "<entrypoint>",
+    "Path to the TypeScript/JavaScript file that imports all your functions",
+  )
+  .option("-u, --api-url <url>", "API endpoint URL")
+  .option("--dry-run", "Show what would be published without uploading")
+  .action(async (entrypoint, options) => {
+    try {
+      const { publishFunction } = await import("./publish/index.js");
+      await publishFunction({
+        entrypoint: entrypoint,
+        apiUrl: options.apiUrl,
+        dryRun: options.dryRun,
+      });
+    } catch (error) {
+      console.error(chalk.red("Publish failed:"), error);
+      process.exit(1);
+    }
+  });
+
 program.parse();
