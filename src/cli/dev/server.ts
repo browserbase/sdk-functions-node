@@ -94,11 +94,6 @@ export async function handleRequest(
 export async function startServer(options: ServerOptions): Promise<Server> {
   const { port, host, bridge, browserManager, handlers } = options;
 
-  // Set the session cleanup callback on the bridge
-  bridge.setSessionCleanupCallback((sessionId: string) =>
-    handlers.cleanupSession(sessionId, browserManager)
-  );
-
   const server = createServer(
     async (req: IncomingMessage, res: ServerResponse) => {
       await handleRequest(req, res, { bridge, browserManager, handlers });
