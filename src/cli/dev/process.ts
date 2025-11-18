@@ -58,22 +58,30 @@ export class ProcessManager implements IProcessManager {
 
     if (this.verbose) {
       console.log(chalk.gray(`Starting runtime process...`));
-      console.log(chalk.gray(`  Command: tsx watch --clear-screen=false ${this.entrypoint}`));
+      console.log(
+        chalk.gray(
+          `  Command: tsx watch --clear-screen=false ${this.entrypoint}`,
+        ),
+      );
       console.log(chalk.gray(`  Working directory: ${workingDirectory}`));
       console.log(chalk.gray(`  Runtime API: ${this.runtimeApiUrl}`));
     }
 
     // Spawn tsx watch with the user's entrypoint
-    this.process = spawn("tsx", ["watch", "--clear-screen=false", this.entrypoint], {
-      cwd: workingDirectory,
-      env: {
-        ...process.env,
-        AWS_LAMBDA_RUNTIME_API: this.runtimeApiUrl,
-        BB_FUNCTIONS_PHASE: "runtime",
-        NODE_ENV: "local",
+    this.process = spawn(
+      "tsx",
+      ["watch", "--clear-screen=false", this.entrypoint],
+      {
+        cwd: workingDirectory,
+        env: {
+          ...process.env,
+          AWS_LAMBDA_RUNTIME_API: this.runtimeApiUrl,
+          BB_FUNCTIONS_PHASE: "runtime",
+          NODE_ENV: "local",
+        },
+        stdio: ["ignore", "pipe", "pipe"],
       },
-      stdio: ["ignore", "pipe", "pipe"],
-    });
+    );
 
     // Handle stdout
     this.process.stdout?.on("data", (data) => {
@@ -125,7 +133,7 @@ export class ProcessManager implements IProcessManager {
 
     // Handle process errors
     this.process.on("error", (error) => {
-      if ((error as any).code === "ENOENT") {
+      if ((error as { code: string }).code === "ENOENT") {
         console.error(
           chalk.red("✗ Failed to start runtime: tsx not found"),
           chalk.yellow(
@@ -195,4 +203,3 @@ export class ProcessManager implements IProcessManager {
     return this.process !== null && this.process.exitCode === null;
   }
 }
-
