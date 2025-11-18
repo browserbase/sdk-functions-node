@@ -1,0 +1,4 @@
+{
+  "entrypoint": "index.ts",
+  "description": "Function with params schema test"
+}

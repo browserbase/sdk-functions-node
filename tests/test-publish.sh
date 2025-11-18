@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Usage: ./test-publish.sh <entrypoint>
+# Usage: ./test-publish.sh
 # Run from within a test directory (e.g., tests/basic/)
-# Required: provide entrypoint file as argument
+# Requires bb.test.json with entrypoint configuration
 
 set -e
 
@@ -25,23 +25,25 @@ print_info() {
   echo -e "${YELLOW}ℹ️  $1${NC}"
 }
 
-# Check if entrypoint argument is provided
-if [ $# -eq 0 ]; then
-  print_error "Error: Entrypoint file argument is required"
-  echo "Usage: $0 <entrypoint>"
-  echo "Example: $0 index.ts"
-  echo "Run this script from within a test directory"
+# Read bb.test.json for configuration
+if [ ! -f "bb.test.json" ]; then
+  print_error "Error: bb.test.json not found"
+  echo "Create a bb.test.json file with an 'entrypoint' field"
+  echo "Example: {\"entrypoint\": \"index.ts\"}"
   exit 1
 fi
 
-# Get entrypoint from argument
-ENTRYPOINT="$1"
+# Extract entrypoint from bb.test.json
+ENTRYPOINT=$(jq -r '.entrypoint' bb.test.json)
+
+if [ -z "$ENTRYPOINT" ] || [ "$ENTRYPOINT" = "null" ]; then
+  print_error "Error: No entrypoint found in bb.test.json"
+  exit 1
+fi
 
 # Check if entrypoint file exists
 if [ ! -f "$ENTRYPOINT" ]; then
   print_error "Error: Entrypoint file '$ENTRYPOINT' not found"
-  echo "Usage: $0 <entrypoint>"
-  echo "Run this script from within a test directory"
   exit 1
 fi
 

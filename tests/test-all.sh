@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Usage: ./test-all.sh [entrypoint]
+# Usage: ./test-all.sh
 # Run from within a test directory (e.g., tests/basic/)
 # Runs all tests: manifest generation, dev server, and publish
-# Optional: provide entrypoint file as argument (defaults to index.ts)
+# Requires bb.test.json with entrypoint configuration
 
 set -e
 
@@ -33,22 +33,27 @@ print_header() {
   echo -e "${BLUE}════════════════════════════════════════${NC}"
 }
 
-# Get entrypoint from argument (required)
-if [ $# -eq 0 ]; then
-  print_error "Error: No entrypoint specified"
-  echo "Usage: $0 <entrypoint>"
-  echo "Example: $0 index.ts"
-  echo "Run this script from within a test directory"
+# Read entrypoint from bb.test.json
+if [ ! -f "bb.test.json" ]; then
+  print_error "Error: bb.test.json not found"
+  echo "Create a bb.test.json file with an 'entrypoint' field"
+  echo "Example: {\"entrypoint\": \"index.ts\"}"
   exit 1
 fi
 
-ENTRYPOINT="$1"
+# Extract entrypoint from bb.test.json
+ENTRYPOINT=$(jq -r '.entrypoint' bb.test.json)
+
+if [ -z "$ENTRYPOINT" ] || [ "$ENTRYPOINT" = "null" ]; then
+  print_error "Error: No entrypoint found in bb.test.json"
+  exit 1
+fi
+
+print_info "Using entrypoint from bb.test.json: $ENTRYPOINT"
 
 # Check if entrypoint exists
 if [ ! -f "$ENTRYPOINT" ]; then
   print_error "Error: Entrypoint file '$ENTRYPOINT' not found"
-  echo "Usage: $0 <entrypoint>"
-  echo "Run this script from within a test directory"
   exit 1
 fi
 
@@ -69,7 +74,7 @@ if [ -d "expected" ]; then
 
   # Use the new test-manifest-generation.sh script
   if [ -f "$TEST_BASE_DIR/test-manifest-generation.sh" ]; then
-    if "$TEST_BASE_DIR/test-manifest-generation.sh" "$ENTRYPOINT"; then
+    if "$TEST_BASE_DIR/test-manifest-generation.sh"; then
       print_success "Manifest generation test passed"
     else
       print_error "Manifest generation test failed"
@@ -87,7 +92,7 @@ fi
 if [ -f "$TEST_BASE_DIR/test-dev.sh" ]; then
   print_header "Test 2: Development Server"
 
-  if "$TEST_BASE_DIR/test-dev.sh" "$ENTRYPOINT"; then
+  if "$TEST_BASE_DIR/test-dev.sh"; then
     print_success "Dev server test passed"
   else
     print_error "Dev server test failed"
@@ -101,7 +106,7 @@ fi
 if [ -f "$TEST_BASE_DIR/test-publish.sh" ]; then
   print_header "Test 3: Publish Command"
 
-  if "$TEST_BASE_DIR/test-publish.sh" "$ENTRYPOINT"; then
+  if "$TEST_BASE_DIR/test-publish.sh"; then
     print_success "Publish test passed"
   else
     print_error "Publish test failed"

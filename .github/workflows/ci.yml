@@ -113,15 +113,6 @@ jobs:
       fail-fast: false
       matrix:
         node-version: ["24.x"]
-        include:
-          - test-package: basic
-            entrypoint: index.ts
-          - test-package: custom-browser-config
-            entrypoint: index.ts
-          - test-package: with-params-schema
-            entrypoint: index.ts
-          - test-package: nested-entrypoint
-            entrypoint: src/index.ts
 
     steps:
       - name: Checkout code
@@ -163,17 +154,21 @@ jobs:
       - name: Build SDK
         run: pnpm run build
 
-      - name: Install test package dependencies
-        working-directory: tests/${{ matrix.test-package }}
-        run: pnpm install --frozen-lockfile
+      - name: Install test dependencies
+        run: |
+          for dir in tests/*/; do
+            if [ -f "$dir/bb.test.json" ]; then
+              echo "Installing dependencies for $(basename $dir)..."
+              (cd "$dir" && pnpm install --frozen-lockfile)
+            fi
+          done
 
       - name: Make test scripts executable
-        run: |
-          chmod +x tests/*.sh
+        run: chmod +x tests/*.sh
 
-      - name: Run ${{ matrix.test-package }} tests
-        working-directory: tests/${{ matrix.test-package }}
+      - name: Run all integration tests
+        working-directory: tests
         env:
           BB_API_KEY: test-api-key
           BB_PROJECT_ID: test-project-id
-        run: ../test-all.sh ${{ matrix.entrypoint }}
+        run: ./run-all-tests.sh

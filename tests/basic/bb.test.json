@@ -1,0 +1,4 @@
+{
+  "entrypoint": "index.ts",
+  "description": "Basic function test"
+}

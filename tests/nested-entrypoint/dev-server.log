@@ -3,7 +3,7 @@ Entrypoint: /Users/ajmcquilkin/GitHub/functions/sdk-functions-node/tests/nested-
 ✓ Browserbase client initialized
 ⚠️  No /Users/ajmcquilkin/GitHub/functions/sdk-functions-node/tests/nested-entrypoint/.browserbase/functions/manifests directory found
   Run your entrypoint file first to generate manifests
-(node:79866) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(node:96184) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
 (Use `node --trace-deprecation ...` to show where the warning was created)
 ✓ Development server listening on http://127.0.0.1:14123
 Starting runtime process...

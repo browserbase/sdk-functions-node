@@ -1,5 +1,5 @@
 {
-  "name": "browser-with-config",
+  "name": "custom-browser-config",
   "config": {
     "sessionConfig": {
       "browserSettings": {

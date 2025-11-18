@@ -1,12 +1,9 @@
 #!/bin/bash
 
-# Usage: ./test-manifest-generation.sh <entrypoint> [expected-dir]
+# Usage: ./test-manifest-generation.sh
 # Run from within a test directory (e.g., tests/basic/)
 # Tests manifest generation against expected outputs
-#
-# Arguments:
-#   entrypoint    - Required: The entrypoint file to test (e.g., index.ts)
-#   expected-dir  - Optional: Directory containing expected manifests (defaults to 'expected')
+# Requires bb.test.json with entrypoint configuration
 
 set -e
 
@@ -41,41 +38,35 @@ compare_json_files() {
   local file1="$1"
   local file2="$2"
 
-  # Check if jq is available for better JSON comparison
-  if command -v jq >/dev/null 2>&1; then
-    # Use jq to normalize and compare JSON
-    if ! diff -q <(jq -S . "$file1" 2>/dev/null) <(jq -S . "$file2" 2>/dev/null) >/dev/null 2>&1; then
-      return 1
-    fi
-  else
-    # Fallback to basic diff
-    if ! diff -q "$file1" "$file2" >/dev/null 2>&1; then
-      return 1
-    fi
+  # Use jq to normalize and compare JSON
+  if ! diff -q <(jq -S . "$file1") <(jq -S . "$file2") >/dev/null 2>&1; then
+    return 1
   fi
   return 0
 }
 
-# Check if entrypoint argument is provided
-if [ $# -eq 0 ]; then
-  print_error "Error: Entrypoint file argument is required"
-  echo "Usage: $0 <entrypoint> [expected-dir]"
-  echo "Example: $0 index.ts"
-  echo "Run this script from within a test directory"
+# Read bb.test.json for configuration
+if [ ! -f "bb.test.json" ]; then
+  print_error "Error: bb.test.json not found"
+  echo "Create a bb.test.json file with an 'entrypoint' field"
+  echo "Example: {\"entrypoint\": \"index.ts\"}"
   exit 1
 fi
 
-# Get entrypoint from argument
-ENTRYPOINT="$1"
+# Extract entrypoint from bb.test.json
+ENTRYPOINT=$(jq -r '.entrypoint' bb.test.json)
 
-# Get expected directory (default to 'expected')
-EXPECTED_DIR="${2:-expected}"
+if [ -z "$ENTRYPOINT" ] || [ "$ENTRYPOINT" = "null" ]; then
+  print_error "Error: No entrypoint found in bb.test.json"
+  exit 1
+fi
+
+# Always use 'expected' directory
+EXPECTED_DIR="expected"
 
 # Check if entrypoint file exists
 if [ ! -f "$ENTRYPOINT" ]; then
   print_error "Error: Entrypoint file '$ENTRYPOINT' not found"
-  echo "Usage: $0 <entrypoint> [expected-dir]"
-  echo "Run this script from within a test directory"
   exit 1
 fi
 
@@ -209,4 +200,3 @@ print_success "Manifest generation test completed successfully!"
 print_info "All generated manifests match the expected output"
 
 exit 0
-

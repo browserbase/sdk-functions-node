@@ -1,0 +1,4 @@
+{
+  "entrypoint": "src/index.ts",
+  "description": "Nested entrypoint test"
+}
