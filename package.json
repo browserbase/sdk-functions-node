@@ -1,6 +1,6 @@
 {
-  "name": "sdk-functions-node",
-  "version": "0.0.1",
+  "name": "@browserbasehq/sdk-functions-node-dev",
+  "version": "1.0.3",
   "description": "",
   "type": "module",
   "exports": {
@@ -40,6 +40,7 @@
   "packageManager": "pnpm@10.12.1",
   "devDependencies": {
     "@eslint/js": "^9.35.0",
+    "@types/archiver": "^7.0.0",
     "@types/node": "^24.3.1",
     "eslint": "^9.35.0",
     "globals": "^16.3.0",
@@ -54,6 +55,7 @@
   "dependencies": {
     "@browserbasehq/sdk": "^2.6.0",
     "@std/expect": "jsr:^1.0.17",
+    "archiver": "^7.0.1",
     "chalk": "^5.6.2",
     "commander": "^14.0.2",
     "dotenv": "^17.2.3",
