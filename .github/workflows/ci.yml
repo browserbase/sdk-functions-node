@@ -169,6 +169,6 @@ jobs:
       - name: Run all integration tests
         working-directory: tests
         env:
-          BB_API_KEY: test-api-key
-          BB_PROJECT_ID: test-project-id
+          BB_API_KEY: ${{ secrets.BB_INTEGRATION_TEST_API_KEY }}
+          BB_PROJECT_ID: ${{ secrets.BB_INTEGRATION_TEST_PROJECT_ID }}
         run: ./run-all-tests.sh
