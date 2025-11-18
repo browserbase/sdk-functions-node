@@ -49,17 +49,3 @@ defineFn(
     },
   },
 );
-
-// Test function without custom sessionConfig (uses defaults)
-defineFn("browser-default-config", async ({ session }) => {
-  console.log("Function invoked with default browser session:");
-  console.log("  Session ID:", session.id);
-  console.log("  Connect URL:", session.connectUrl);
-
-  return {
-    message: "Successfully executed function with default browser session",
-    sessionId: session.id,
-    sessionUrl: session.connectUrl,
-    timestamp: new Date().toISOString(),
-  };
-});

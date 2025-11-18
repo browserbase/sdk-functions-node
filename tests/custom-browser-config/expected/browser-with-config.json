@@ -1,6 +1,10 @@
 {
   "name": "browser-with-config",
   "config": {
-    "sessionConfig": {}
+    "sessionConfig": {
+      "browserSettings": {
+        "advancedStealth": true
+      }
+    }
   }
 }
