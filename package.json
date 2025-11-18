@@ -1,6 +1,6 @@
 {
-  "name": "sdk-functions-node",
-  "version": "0.0.1",
+  "name": "@browserbasehq/sdk-functions-node-dev",
+  "version": "1.0.3",
   "description": "",
   "type": "module",
   "exports": {
