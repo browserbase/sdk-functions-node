@@ -1,8 +1,8 @@
-import { defineFn } from "sdk-functions-node";
+import { defineFn } from "@browserbasehq/sdk-functions-node-dev";
 import z from "zod";
 
 defineFn(
-  "withParamsSchema",
+  "with-params-schema",
   async (_ctx, params) => {
     const x = params.data;
     const returnValue = x * 2;

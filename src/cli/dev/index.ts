@@ -80,13 +80,31 @@ export async function startDevServer(options: DevServerOptions): Promise<void> {
     console.log(chalk.cyan("Starting runtime process..."));
     await processManager.start();
 
-    // Wait a moment for the runtime to connect
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    // Wait for runtime to connect with retry logic
+    const maxWaitTime = 10000; // 10 seconds max
+    const pollInterval = 200; // Check every 200ms
+    const startTime = Date.now();
+    let runtimeConnected = false;
 
-    if (bridge.isRuntimeConnected()) {
-      console.log(chalk.green("✓ Runtime connected and ready"));
-    } else {
-      console.log(chalk.yellow("⚠️  Waiting for runtime to connect..."));
+    while (Date.now() - startTime < maxWaitTime) {
+      if (bridge.isRuntimeConnected()) {
+        runtimeConnected = true;
+        console.log(chalk.green("✓ Runtime connected and ready"));
+        // Reload manifests after runtime starts as it may have created them
+        manifestStore.loadManifests();
+        break;
+      }
+      await new Promise((resolve) => setTimeout(resolve, pollInterval));
+    }
+
+    if (!runtimeConnected) {
+      console.log(
+        chalk.yellow(
+          "⚠️  Runtime is taking longer than expected to connect...",
+        ),
+      );
+      // Still try to reload manifests in case they were written
+      manifestStore.loadManifests();
     }
 
     // Handle graceful shutdown

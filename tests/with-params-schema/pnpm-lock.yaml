@@ -7,7 +7,7 @@ settings:
 importers:
   .:
     dependencies:
-      sdk-functions-node:
+      "@browserbasehq/sdk-functions-node-dev":
         specifier: link:../..
         version: link:../..
     devDependencies:

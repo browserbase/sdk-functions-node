@@ -1,0 +1,10 @@
+{
+  "name": "nested-entrypoint",
+  "config": {
+    "sessionConfig": {
+      "browserSettings": {
+        "advancedStealth": true
+      }
+    }
+  }
+}

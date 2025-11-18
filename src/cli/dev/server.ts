@@ -47,6 +47,13 @@ export async function handleRequest(
   }
 
   try {
+    // Route: GET / (healthcheck)
+    if (method === "GET" && path === "/") {
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ ok: true }));
+      return;
+    }
+
     // Route: GET /2018-06-01/runtime/invocation/next
     if (method === "GET" && path === "/2018-06-01/runtime/invocation/next") {
       await handlers.handleInvocationNext(req, res);

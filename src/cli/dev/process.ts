@@ -1,5 +1,4 @@
 import { spawn, ChildProcess } from "child_process";
-import { dirname } from "path";
 import chalk from "chalk";
 
 export interface ProcessManagerOptions {
@@ -54,8 +53,6 @@ export class ProcessManager implements IProcessManager {
       throw new Error("Process is already running");
     }
 
-    const workingDirectory = dirname(this.entrypoint);
-
     if (this.verbose) {
       console.log(chalk.gray(`Starting runtime process...`));
       console.log(
@@ -63,7 +60,7 @@ export class ProcessManager implements IProcessManager {
           `  Command: tsx watch --clear-screen=false ${this.entrypoint}`,
         ),
       );
-      console.log(chalk.gray(`  Working directory: ${workingDirectory}`));
+      console.log(chalk.gray(`  Working directory: ${process.cwd()}`));
       console.log(chalk.gray(`  Runtime API: ${this.runtimeApiUrl}`));
     }
 
@@ -72,7 +69,7 @@ export class ProcessManager implements IProcessManager {
       "tsx",
       ["watch", "--clear-screen=false", this.entrypoint],
       {
-        cwd: workingDirectory,
+        cwd: process.cwd(),
         env: {
           ...process.env,
           AWS_LAMBDA_RUNTIME_API: this.runtimeApiUrl,
