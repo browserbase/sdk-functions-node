@@ -31,7 +31,7 @@ export class EnvironmentManager {
     this._runtimeApi = getOrDefault<typeof this._runtimeApi>(
       processEnv,
       "AWS_LAMBDA_RUNTIME_API",
-      "127.0.0.1:9001",
+      "127.0.0.1:14113",
     );
 
     this._phase = getOrDefault<typeof this._phase>(

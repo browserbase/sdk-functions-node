@@ -2,8 +2,7 @@ import type { IRuntimeClient } from "./index.js";
 
 export async function waitForAndHandleInvocation(
   runtimeClient: IRuntimeClient,
-  handleProductionFailure: (error: unknown) => void,
-  environment: string,
+  handleFatalError: (error: unknown) => void,
 ) {
   // Any errors caught by this block will be considered fatal system errors
   try {
@@ -44,24 +43,15 @@ export async function waitForAndHandleInvocation(
     console.log(`Function "${functionName}" completed successfully`);
   } catch (error: unknown) {
     console.error("Fatal error in runtime loop:", error);
-    // In production Lambda, this would cause the container to be recycled
-    // For development, we'll continue the loop
-    if (environment === "production") {
-      handleProductionFailure(error);
-    }
+    handleFatalError(error);
   }
 }
 
 export async function runInvocationLoop(
   runtimeClient: IRuntimeClient,
   handleProductionFailure: (error: unknown) => void,
-  environment: string,
 ): Promise<void> {
   while (true) {
-    await waitForAndHandleInvocation(
-      runtimeClient,
-      handleProductionFailure,
-      environment,
-    );
+    await waitForAndHandleInvocation(runtimeClient, handleProductionFailure);
   }
 }

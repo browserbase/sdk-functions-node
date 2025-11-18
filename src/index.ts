@@ -18,12 +18,10 @@ function handleInvocationLoopFailure(error: unknown): void {
 }
 // We only want to listen for invocations iff we're in the "runtime" phase
 if (environmentManager.phase === "runtime") {
-  runInvocationLoop(
-    runtimeClient,
-    handleInvocationLoopFailure,
-    environmentManager.environment,
-  ).catch((error: unknown) => {
-    console.error("Fatal runtime error:", error);
-    process.exit(1);
-  });
+  runInvocationLoop(runtimeClient, handleInvocationLoopFailure).catch(
+    (error: unknown) => {
+      console.error("Fatal runtime error:", error);
+      process.exit(1);
+    },
+  );
 }
