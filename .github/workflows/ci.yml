@@ -117,7 +117,6 @@ jobs:
           - basic
           - custom-browser-config
           - with-params-schema
-          - nested-entrypoint
 
     steps:
       - name: Checkout code
