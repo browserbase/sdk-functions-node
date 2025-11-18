@@ -79,7 +79,6 @@ describe("waitForAndHandleInvocation", () => {
       await waitForAndHandleInvocation(
         mockClient,
         handleProductionFailure as unknown as (error: unknown) => void,
-        "development",
       );
 
       // Assert
@@ -168,7 +167,6 @@ describe("waitForAndHandleInvocation", () => {
       await waitForAndHandleInvocation(
         mockClient,
         handleProductionFailure as unknown as (error: unknown) => void,
-        "development",
       );
 
       // Assert
@@ -224,7 +222,6 @@ describe("waitForAndHandleInvocation", () => {
       await waitForAndHandleInvocation(
         mockClient,
         handleProductionFailure as unknown as (error: unknown) => void,
-        "development",
       );
 
       // Assert - system error means no success/failure handlers called
@@ -246,7 +243,7 @@ describe("waitForAndHandleInvocation", () => {
         ).mock.callCount(),
         0,
       );
-      assert.strictEqual(handleProductionFailure.mock.callCount(), 0); // Not called in development
+      assert.strictEqual(handleProductionFailure.mock.callCount(), 1); // Now called for all fatal errors
     });
 
     test("calls handleProductionFailure in production environment", async () => {
@@ -265,7 +262,6 @@ describe("waitForAndHandleInvocation", () => {
       await waitForAndHandleInvocation(
         mockClient,
         handleProductionFailure as unknown as (error: unknown) => void,
-        "production",
       );
 
       // Assert
@@ -288,7 +284,7 @@ describe("waitForAndHandleInvocation", () => {
       );
     });
 
-    test("does not call handleProductionFailure in development environment", async () => {
+    test("calls handleProductionFailure for all fatal errors", async () => {
       const systemError = new Error("Fatal system error");
 
       // Setup mocks
@@ -304,11 +300,14 @@ describe("waitForAndHandleInvocation", () => {
       await waitForAndHandleInvocation(
         mockClient,
         handleProductionFailure as unknown as (error: unknown) => void,
-        "development",
       );
 
-      // Assert
-      assert.strictEqual(handleProductionFailure.mock.callCount(), 0);
+      // Assert - now always calls handleProductionFailure for fatal errors
+      assert.strictEqual(handleProductionFailure.mock.callCount(), 1);
+      assert.strictEqual(
+        handleProductionFailure.mock.calls[0]?.arguments[0],
+        systemError,
+      );
       assert.strictEqual(
         (
           mockClient.handleSuccess as unknown as ReturnType<typeof mock.fn>
@@ -379,7 +378,6 @@ describe("waitForAndHandleInvocation", () => {
       await waitForAndHandleInvocation(
         mockClient,
         handleProductionFailure as unknown as (error: unknown) => void,
-        "production",
       );
 
       // Assert
@@ -448,7 +446,6 @@ describe("waitForAndHandleInvocation", () => {
       await waitForAndHandleInvocation(
         mockClient,
         handleProductionFailure as unknown as (error: unknown) => void,
-        "production",
       );
 
       // Assert

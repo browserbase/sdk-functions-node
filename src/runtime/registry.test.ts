@@ -77,7 +77,7 @@ describe("FunctionRegistry", () => {
         age: z.number(),
       });
 
-      const handler = async (params: z.infer<typeof schema>) => ({
+      const handler: FunctionHandler<typeof schema> = async (_ctx, params) => ({
         greeting: `Hello ${params.name}, age ${params.age}`,
       });
 
@@ -117,7 +117,7 @@ describe("FunctionRegistry", () => {
     test("registers function with both parametersSchema and sessionConfig", () => {
       const registry = new FunctionRegistry();
       const schema = z.object({ input: z.string() });
-      const handler = async (params: z.infer<typeof schema>) => ({
+      const handler: FunctionHandler<typeof schema> = async (_ctx, params) => ({
         output: params.input.toUpperCase(),
       });
       const config: FunctionConfiguration<typeof schema> = {
@@ -179,8 +179,8 @@ describe("FunctionRegistry", () => {
       const registry = new FunctionRegistry();
       const schema = z.object({ value: z.number() });
       const handler: FunctionHandler<typeof schema> = async (
-        params,
         context,
+        params,
       ) => ({
         doubledValue: params.value * 2,
         invocationId: context.invocation.id,
@@ -206,7 +206,7 @@ describe("FunctionRegistry", () => {
       const registry = new FunctionRegistry();
       let sideEffect = 0;
       const schema = z.object({ increment: z.number() });
-      const handler: FunctionHandler<typeof schema> = async (params) => {
+      const handler: FunctionHandler<typeof schema> = async (_ctx, params) => {
         sideEffect += params.increment;
       };
 
@@ -227,7 +227,7 @@ describe("FunctionRegistry", () => {
     test("executes synchronous handler", async () => {
       const registry = new FunctionRegistry();
       const schema = z.object({ value: z.string() });
-      const handler: FunctionHandler<typeof schema> = (params) => ({
+      const handler: FunctionHandler<typeof schema> = (_ctx, params) => ({
         uppercased: params.value.toUpperCase(),
       });
 
@@ -266,7 +266,7 @@ describe("FunctionRegistry", () => {
     test("passes context correctly to handler", async () => {
       const registry = new FunctionRegistry();
       let capturedContext: FunctionInvocationContext | null = null;
-      const handler: FunctionHandler<unknown> = async (_params, context) => {
+      const handler: FunctionHandler<unknown> = async (context, _params) => {
         capturedContext = context;
         return { success: true };
       };
@@ -361,7 +361,7 @@ describe("FunctionRegistry", () => {
           notifications: z.boolean(),
         }),
       });
-      const handler: FunctionHandler<typeof schema> = async (params) => ({
+      const handler: FunctionHandler<typeof schema> = async (_ctx, params) => ({
         summary: `${params.user.name} (${params.user.age}) - Theme: ${params.settings.theme}`,
       });
 
