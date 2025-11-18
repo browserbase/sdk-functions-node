@@ -205,6 +205,41 @@ fi
 
 print_success "Dev server started successfully on port $PORT"
 
+# Wait for function to be registered (poll for non-404 response)
+print_info "Waiting for function '$PRIMARY_FUNCTION' to be registered..."
+FUNCTION_READY_WAIT=15  # Wait up to 15 seconds for function registration
+FUNCTION_WAIT_COUNT=0
+
+while [ $FUNCTION_WAIT_COUNT -lt $FUNCTION_READY_WAIT ]; do
+  # Try to invoke the function and check if it's registered (non-404)
+  FUNC_STATUS=$(curl -s -w "%{http_code}" -X POST "http://127.0.0.1:$PORT/v1/functions/$PRIMARY_FUNCTION/invoke" \
+    -H "Content-Type: application/json" \
+    -H "x-bb-api-key: ${BB_API_KEY}" \
+    -d '{"params": {}}' \
+    -o /dev/null 2>/dev/null)
+
+  # If we get anything other than 404, the function is registered
+  if [ "$FUNC_STATUS" != "404" ] && [ -n "$FUNC_STATUS" ]; then
+    print_success "Function '$PRIMARY_FUNCTION' is registered and ready (status: $FUNC_STATUS)"
+    break
+  fi
+
+  sleep 0.5
+  FUNCTION_WAIT_COUNT=$((FUNCTION_WAIT_COUNT + 1))
+
+  # Show progress every 3 seconds
+  if [ $((FUNCTION_WAIT_COUNT % 6)) -eq 0 ]; then
+    echo "  Still waiting for function to register... ($FUNCTION_WAIT_COUNT seconds)"
+  fi
+done
+
+if [ $FUNCTION_WAIT_COUNT -eq $FUNCTION_READY_WAIT ]; then
+  print_error "Function '$PRIMARY_FUNCTION' was not registered within $FUNCTION_READY_WAIT seconds"
+  echo "Server logs:"
+  tail -30 dev-server.log
+  exit 1
+fi
+
 # Test 1: Server healthcheck endpoint
 print_info "Test 1: Checking server healthcheck endpoint..."
 HEALTH_RESPONSE=$(curl -s "http://127.0.0.1:$PORT/" 2>/dev/null)
