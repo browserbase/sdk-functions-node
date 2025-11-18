@@ -23,7 +23,7 @@
     "./dist/index.js"
   ],
   "scripts": {
-    "build": "rm -rf dist && tsup",
+    "build": "$npm_execpath run lint && rm -rf dist && tsup",
     "build:tests": "tsc --project tsconfig.test.json",
     "eslint": "eslint ./src",
     "eslint:fix": "eslint --fix ./src",

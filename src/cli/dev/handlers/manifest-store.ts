@@ -16,7 +16,9 @@ export interface IManifestStore {
   /**
    * Get a manifest by function name
    */
-  getManifest(functionName: string): PersistedFunctionManifest<JSONSchemaInput> | undefined;
+  getManifest(
+    functionName: string,
+  ): PersistedFunctionManifest<JSONSchemaInput> | undefined;
 
   /**
    * Get the total number of loaded manifests
@@ -38,16 +40,16 @@ export interface IManifestStore {
  * Implementation of manifest store for managing function manifests
  */
 export class ManifestStore implements IManifestStore {
-  private manifests = new Map<string, PersistedFunctionManifest<JSONSchemaInput>>();
+  private manifests = new Map<
+    string,
+    PersistedFunctionManifest<JSONSchemaInput>
+  >();
   private manifestsPath: string;
 
   constructor(manifestsPath?: string) {
-    this.manifestsPath = manifestsPath || join(
-      process.cwd(),
-      ".browserbase",
-      "functions",
-      "manifests",
-    );
+    this.manifestsPath =
+      manifestsPath ||
+      join(process.cwd(), ".browserbase", "functions", "manifests");
   }
 
   /**
@@ -55,9 +57,7 @@ export class ManifestStore implements IManifestStore {
    */
   public loadManifests(): void {
     if (!existsSync(this.manifestsPath)) {
-      console.log(
-        chalk.yellow(`⚠️  No ${this.manifestsPath} directory found`),
-      );
+      console.log(chalk.yellow(`⚠️  No ${this.manifestsPath} directory found`));
       console.log(
         chalk.gray("  Run your entrypoint file first to generate manifests"),
       );
@@ -100,7 +100,9 @@ export class ManifestStore implements IManifestStore {
   /**
    * Get a manifest by function name
    */
-  public getManifest(functionName: string): PersistedFunctionManifest<JSONSchemaInput> | undefined {
+  public getManifest(
+    functionName: string,
+  ): PersistedFunctionManifest<JSONSchemaInput> | undefined {
     return this.manifests.get(functionName);
   }
 

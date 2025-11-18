@@ -149,4 +149,3 @@ export class RemoteBrowserManager implements IRemoteBrowserManager {
     return this.initialized;
   }
 }
-

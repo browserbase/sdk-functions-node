@@ -63,4 +63,3 @@ defineFn("browser-default-config", async ({ session }) => {
     timestamp: new Date().toISOString(),
   };
 });
-

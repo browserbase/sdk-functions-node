@@ -38,7 +38,9 @@ export interface IInvocationBridge {
   /**
    * Set a callback to be called when a session should be cleaned up.
    */
-  setSessionCleanupCallback(callback: (sessionId: string) => Promise<void>): void;
+  setSessionCleanupCallback(
+    callback: (sessionId: string) => Promise<void>,
+  ): void;
 
   /**
    * Hold a connection from the runtime waiting for the next invocation.
@@ -98,7 +100,9 @@ export class InvocationBridge implements IInvocationBridge {
   private currentRequestId: string | null = null;
   private currentFunctionName: string | null = null;
   private currentSessionId: string | null = null;
-  private sessionCleanupCallback: ((sessionId: string) => Promise<void>) | null = null;
+  private sessionCleanupCallback:
+    | ((sessionId: string) => Promise<void>)
+    | null = null;
   private verbose: boolean;
   private runtimeConnectedOnce: boolean = false;
 
@@ -354,4 +358,3 @@ export class InvocationBridge implements IInvocationBridge {
     return this.runtimeConnectedOnce && this.nextConnection !== null;
   }
 }
-

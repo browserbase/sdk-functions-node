@@ -13,10 +13,7 @@ export interface IRequestParser {
   /**
    * Parse and validate JSON body with a Zod schema
    */
-  parseAndValidate<T>(
-    req: IncomingMessage,
-    schema: z.ZodType<T>
-  ): Promise<T>;
+  parseAndValidate<T>(req: IncomingMessage, schema: z.ZodType<T>): Promise<T>;
 }
 
 /**
@@ -46,9 +43,9 @@ export const requestParser: IRequestParser = {
 
   async parseAndValidate<T>(
     req: IncomingMessage,
-    schema: z.ZodType<T>
+    schema: z.ZodType<T>,
   ): Promise<T> {
     const body = await this.parseJsonBody(req);
     return schema.parse(body);
-  }
+  },
 };

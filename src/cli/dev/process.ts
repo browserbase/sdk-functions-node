@@ -133,7 +133,7 @@ export class ProcessManager implements IProcessManager {
 
     // Handle process errors
     this.process.on("error", (error) => {
-      if ((error as { code: string }).code === "ENOENT") {
+      if ((error as Error & { code: string }).code === "ENOENT") {
         console.error(
           chalk.red("✗ Failed to start runtime: tsx not found"),
           chalk.yellow(

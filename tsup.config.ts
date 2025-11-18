@@ -4,7 +4,7 @@ import { join } from "path";
 
 // Read package.json at build time
 const packageJson = JSON.parse(
-  readFileSync(join(process.cwd(), "package.json"), "utf-8")
+  readFileSync(join(process.cwd(), "package.json"), "utf-8"),
 );
 
 export default defineConfig([

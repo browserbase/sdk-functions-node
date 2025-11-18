@@ -145,4 +145,3 @@ export const responseBuilder: IResponseBuilder = {
     this.sendJson(res, 202, response);
   },
 };
-

@@ -144,10 +144,11 @@ class MockBridge implements IInvocationBridge {
     [(sessionId: string) => Promise<void>]
   > = [];
   public holdNextConnectionCalls: Array<[ServerResponse]> = [];
-  public triggerInvocationCalls: Array<[string, unknown, any, ServerResponse]> =
-    [];
+  public triggerInvocationCalls: Array<
+    [string, unknown, unknown, ServerResponse]
+  > = [];
   public completeWithSuccessCalls: Array<[string, unknown]> = [];
-  public completeWithErrorCalls: Array<[string, any]> = [];
+  public completeWithErrorCalls: Array<[string, unknown]> = [];
 
   setSessionCleanupCallback(
     callback: (sessionId: string) => Promise<void>,
@@ -162,7 +163,7 @@ class MockBridge implements IInvocationBridge {
   triggerInvocation(
     functionName: string,
     params: unknown,
-    context: any,
+    context: unknown,
     clientRes: ServerResponse,
   ): boolean {
     this.triggerInvocationCalls.push([
@@ -179,7 +180,7 @@ class MockBridge implements IInvocationBridge {
     return true;
   }
 
-  completeWithError(requestId: string, error: any): boolean {
+  completeWithError(requestId: string, error: unknown): boolean {
     this.completeWithErrorCalls.push([requestId, error]);
     return true;
   }
@@ -214,7 +215,7 @@ class MockBridge implements IInvocationBridge {
  */
 class MockBrowserManager implements IRemoteBrowserManager {
   public initializeCalls: Array<[]> = [];
-  public createSessionCalls: Array<[any]> = [];
+  public createSessionCalls: Array<[unknown]> = [];
   public closeSessionCalls: Array<[string]> = [];
 
   async initialize(): Promise<void> {
@@ -222,7 +223,7 @@ class MockBrowserManager implements IRemoteBrowserManager {
   }
 
   async createSession(
-    config?: any,
+    config?: unknown,
   ): Promise<{ id: string; connectUrl: string }> {
     this.createSessionCalls.push([config]);
     return { id: "test-session-id", connectUrl: "ws://localhost:9222" };
@@ -252,9 +253,9 @@ class MockBrowserManager implements IRemoteBrowserManager {
  */
 class MockServerResponse extends ServerResponse {
   public setHeaderCalls: Array<[string, string | number | string[]]> = [];
-  public writeHeadCalls: Array<[number, any?]> = [];
-  public endCalls: Array<[any?]> = [];
-  public writeCalls: Array<[any]> = [];
+  public writeHeadCalls: Array<[number, unknown?]> = [];
+  public endCalls: Array<[unknown?]> = [];
+  public writeCalls: Array<[unknown]> = [];
 
   constructor(req: IncomingMessage) {
     super(req);
@@ -265,17 +266,17 @@ class MockServerResponse extends ServerResponse {
     return this;
   }
 
-  override writeHead(statusCode: number, headers?: any): this {
+  override writeHead(statusCode: number, headers?: unknown): this {
     this.writeHeadCalls.push([statusCode, headers]);
     return this;
   }
 
-  override end(chunk?: any): this {
+  override end(chunk?: unknown): this {
     this.endCalls.push([chunk]);
     return this;
   }
 
-  override write(chunk: any): boolean {
+  override write(chunk: unknown): boolean {
     this.writeCalls.push([chunk]);
     return true;
   }

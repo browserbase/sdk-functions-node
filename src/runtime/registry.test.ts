@@ -266,7 +266,7 @@ describe("FunctionRegistry", () => {
     test("passes context correctly to handler", async () => {
       const registry = new FunctionRegistry();
       let capturedContext: FunctionInvocationContext | null = null;
-      const handler: FunctionHandler<unknown> = async (context, _params) => {
+      const handler: FunctionHandler<unknown> = async (context) => {
         capturedContext = context;
         return { success: true };
       };

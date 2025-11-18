@@ -6,6 +6,7 @@ import { RemoteBrowserManager } from "./browser-manager.js";
 import { DevServerHandlers } from "./handlers/index.js";
 import "dotenv/config";
 import { ManifestStore } from "./handlers/manifest-store.js";
+import type { Server } from "node:http";
 
 export interface DevServerOptions {
   entrypoint: string;
@@ -59,7 +60,7 @@ export async function startDevServer(options: DevServerOptions): Promise<void> {
   });
 
   // Start the server
-  let server: any = null;
+  let server: Server | null = null;
 
   try {
     // Start the server first
@@ -97,7 +98,7 @@ export async function startDevServer(options: DevServerOptions): Promise<void> {
 
       // Then close the server
       return new Promise<void>((resolve) => {
-        server.close(() => {
+        server?.close(() => {
           console.log(chalk.green("✓ Server closed"));
           resolve();
         });
