@@ -3,20 +3,15 @@ import * as z from "zod";
 import { defineFn } from "@browserbasehq/sdk-functions-node-dev";
 
 const ApiResponseSchema = z.object({
-  $id: z.string(),
-  currentDateTime: z.string().nullable(),
-  utcOffset: z.string().nullable(),
-  isDayLightSavingsTime: z.boolean(),
-  dayOfTheWeek: z.string().nullable(),
-  timeZoneName: z.string().nullable(),
-  currentFileTime: z.number(),
-  ordinalDate: z.string().nullable(),
-  serviceResponse: z.string().nullable(),
+  userId: z.number(),
+  id: z.number(),
+  title: z.string(),
+  completed: z.boolean(),
 });
 
 defineFn(
   "custom-browser-config",
-  async (context, params) => {
+  async (context) => {
     const { session } = context;
 
     console.log("Function invoked with browser session:");
@@ -27,13 +22,10 @@ defineFn(
     const browserContext = browser.contexts()[0];
     const page = browserContext.pages()[0];
 
-    try {
-      await page.goto(
-        `http://worldclockapi.com/api/json/${(params as { timezone: string }).timezone}/now`,
-      );
-    } catch (error: unknown) {
-      console.warn(error, "Received error going to contact page");
-    }
+    const randomId = Math.floor(Math.random() * 200);
+    console.log({ randomId }, "picked random id");
+
+    await page.goto(`https://jsonplaceholder.typicode.com/todos/${randomId}`);
 
     const pageContent = await page.textContent("body");
     console.log(pageContent, "page content");
