@@ -8,9 +8,6 @@ import type { FunctionConfiguration } from "../types/definition.js";
 import type { FunctionHandler } from "../types/handler.js";
 
 const defaultMockContext: FunctionInvocationContext = {
-  invocation: {
-    id: "inv-123",
-  },
   session: {
     id: "session-456",
     connectUrl: "https://example.com/connect",
@@ -179,11 +176,10 @@ describe("FunctionRegistry", () => {
       const registry = new FunctionRegistry();
       const schema = z.object({ value: z.number() });
       const handler: FunctionHandler<typeof schema> = async (
-        context,
+        _context,
         params,
       ) => ({
         doubledValue: params.value * 2,
-        invocationId: context.invocation.id,
       });
 
       registry.register("doubleFunction", handler, {
@@ -198,7 +194,6 @@ describe("FunctionRegistry", () => {
 
       assert.deepStrictEqual(result, {
         doubledValue: 10,
-        invocationId: "inv-123",
       });
     });
 
