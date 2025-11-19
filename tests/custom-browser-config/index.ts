@@ -1,6 +1,6 @@
 import { chromium } from "playwright-core";
 import * as z from "zod";
-import { defineFn } from "@browserbasehq/sdk-functions-node-dev";
+import { defineFn } from "@browserbasehq/sdk-functions";
 
 const ApiResponseSchema = z.object({
   $id: z.string(),
