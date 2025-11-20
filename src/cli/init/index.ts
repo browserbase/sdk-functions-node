@@ -58,7 +58,10 @@ export async function init(options: InitOptions) {
       console.log(chalk.yellow("✓ Git repository already exists"));
     }
 
-    // Step 3: Initialize package.json
+    // Step 3: Create .gitignore file
+    createGitignoreFile(targetDir);
+
+    // Step 4: Initialize package.json
     if (!existsSync(join(targetDir, "package.json"))) {
       console.log(chalk.gray("Creating package.json..."));
       execSync("pnpm init", { cwd: targetDir, stdio: "pipe" });
@@ -67,19 +70,19 @@ export async function init(options: InitOptions) {
       console.log(chalk.yellow("✓ package.json already exists"));
     }
 
-    // Step 4: Detect and update package manager
+    // Step 5: Detect and update package manager
     const packageManager = detectPackageManager(options.packageManager);
     updatePackageManager(targetDir, packageManager);
 
-    // Step 5: Install dependencies
+    // Step 6: Install dependencies
     console.log(chalk.gray("Installing dependencies..."));
     installDependencies(targetDir, packageManager);
     console.log(chalk.green("✓ Dependencies installed"));
 
-    // Step 6: Create .env file
+    // Step 7: Create .env file
     createEnvFile(targetDir);
 
-    // Step 7: Initialize TypeScript configuration
+    // Step 8: Initialize TypeScript configuration
     if (!existsSync(join(targetDir, "tsconfig.json"))) {
       console.log(chalk.gray("Initializing TypeScript configuration..."));
       execSync(`${packageManager === "pnpm" ? "pnpm" : "npx"} tsc --init`, {
@@ -94,7 +97,7 @@ export async function init(options: InitOptions) {
       console.log(chalk.yellow("✓ TypeScript configuration already exists"));
     }
 
-    // Step 8: Create starter function
+    // Step 9: Create starter function
     createStarterFunction(targetDir);
 
     // Success message
@@ -229,6 +232,17 @@ function createEnvFile(targetDir: string) {
     console.log(chalk.green("✓ .env file created"));
   } else {
     console.log(chalk.yellow("✓ .env file already exists"));
+  }
+}
+
+function createGitignoreFile(targetDir: string) {
+  const gitignorePath = join(targetDir, ".gitignore");
+  if (!existsSync(gitignorePath)) {
+    const templatePath = join(__dirname, "templates", ".gitignore.template");
+    copyFileSync(templatePath, gitignorePath);
+    console.log(chalk.green("✓ .gitignore file created"));
+  } else {
+    console.log(chalk.yellow("✓ .gitignore file already exists"));
   }
 }
 
