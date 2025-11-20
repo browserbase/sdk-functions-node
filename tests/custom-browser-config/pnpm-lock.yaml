@@ -7,7 +7,7 @@ settings:
 importers:
   .:
     dependencies:
-      "@browserbasehq/sdk-functions-node-dev":
+      "@browserbasehq/sdk-functions":
         specifier: link:../..
         version: link:../..
       playwright-core:

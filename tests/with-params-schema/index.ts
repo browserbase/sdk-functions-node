@@ -1,4 +1,4 @@
-import { defineFn } from "@browserbasehq/sdk-functions-node-dev";
+import { defineFn } from "@browserbasehq/sdk-functions";
 import z from "zod";
 
 defineFn(
