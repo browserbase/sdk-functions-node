@@ -32,7 +32,6 @@ describe("waitForAndHandleInvocation", () => {
           functionName: "testFunction",
           params: {},
           context: {
-            invocation: { id: "inv-123" },
             session: { id: "session-123", connectUrl: "ws://test" },
           },
         },
@@ -120,7 +119,6 @@ describe("waitForAndHandleInvocation", () => {
           functionName: "failingFunction",
           params: {},
           context: {
-            invocation: { id: "inv-456" },
             session: { id: "session-456", connectUrl: "ws://test" },
           },
         },
@@ -197,7 +195,6 @@ describe("waitForAndHandleInvocation", () => {
           functionName: "nonExistentFunction",
           params: {},
           context: {
-            invocation: { id: "inv-789" },
             session: { id: "session-789", connectUrl: "ws://test" },
           },
         },
@@ -331,7 +328,6 @@ describe("waitForAndHandleInvocation", () => {
           functionName: "testFunction",
           params: {},
           context: {
-            invocation: { id: "inv-321" },
             session: { id: "session-321", connectUrl: "ws://test" },
           },
         },
@@ -396,7 +392,6 @@ describe("waitForAndHandleInvocation", () => {
           functionName: "failingFunction",
           params: {},
           context: {
-            invocation: { id: "inv-654" },
             session: { id: "session-654", connectUrl: "ws://test" },
           },
         },

@@ -1,21 +1,11 @@
 import { ServerResponse } from "http";
 import { randomUUID } from "crypto";
 import chalk from "chalk";
+import type { FunctionInvocationContext } from "../../schemas/invocation.js";
 
 interface HeldConnection {
   response: ServerResponse;
   timestamp: number;
-}
-
-interface FunctionInvocationContext {
-  invocation: {
-    id: string;
-    region?: string;
-  };
-  session: {
-    id: string;
-    connectUrl: string;
-  };
 }
 
 export interface InvocationPayload {
