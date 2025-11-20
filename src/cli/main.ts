@@ -2,6 +2,7 @@
 import { Command } from "commander";
 import chalk from "chalk";
 import { startDevServer } from "./dev/index.js";
+import { init } from "./init/index.js";
 
 // Version is injected at build time
 declare const __CLI_VERSION__: string;
@@ -12,6 +13,42 @@ program
   .name("bb")
   .description("Browserbase Functions CLI")
   .version(__CLI_VERSION__);
+
+const validPackageManagers = ["npm", "pnpm"];
+
+program
+  .command("init <project-name>")
+  .description("Initialize a new Browserbase Functions project")
+  .option(
+    "-p, --package-manager <manager>",
+    `Package manager to use (${validPackageManagers.join(" or ")})`,
+    "pnpm",
+  )
+  .action(async (projectName, options) => {
+    try {
+      const packageManager = options.packageManager.toLowerCase();
+
+      if (!validPackageManagers.includes(packageManager)) {
+        console.error(
+          chalk.red(
+            `Error: Invalid package manager "${options.packageManager}"`,
+          ),
+        );
+        console.error(
+          chalk.gray(`Valid options are: ${validPackageManagers.join(", ")}`),
+        );
+        process.exit(1);
+      }
+
+      await init({
+        projectName: projectName,
+        packageManager: packageManager as "npm" | "pnpm",
+      });
+    } catch (error) {
+      console.error(chalk.red("Initialization failed:"), error);
+      process.exit(1);
+    }
+  });
 
 program
   .command("dev")

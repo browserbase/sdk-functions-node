@@ -42,5 +42,6 @@ export default defineConfig([
     minifyIdentifiers: true,
     minifySyntax: true,
     minifyWhitespace: true,
+    onSuccess: "cp -r src/cli/init/templates dist/",
   },
 ]);

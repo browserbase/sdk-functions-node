@@ -1,0 +1,15 @@
+import { defineFn } from "@browserbasehq/sdk-functions";
+
+// This is your first Browserbase function!
+// You can run it locally with: bb dev index.ts
+// Once ready, publish it with: bb publish index.ts
+
+defineFn("my-function", async () => {
+  // Your function logic goes here
+  // You can use the full power of Node.js and any npm packages
+
+  return {
+    message: "Hello from Browserbase!",
+    timestamp: new Date().toISOString()
+  };
+});
