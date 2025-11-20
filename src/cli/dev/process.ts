@@ -1,4 +1,5 @@
-import { spawn, ChildProcess } from "child_process";
+import { spawn, ChildProcess } from "node:child_process";
+import { createRequire } from "node:module";
 import chalk from "chalk";
 
 export interface ProcessManagerOptions {
@@ -64,21 +65,22 @@ export class ProcessManager implements IProcessManager {
       console.log(chalk.gray(`  Runtime API: ${this.runtimeApiUrl}`));
     }
 
+    const createdRequire = createRequire(import.meta.url);
+    const tsxCli = createdRequire.resolve("tsx/cli");
+
+    const args = ["watch", "--clear-screen=false", this.entrypoint];
+
     // Spawn tsx watch with the user's entrypoint
-    this.process = spawn(
-      "tsx",
-      ["watch", "--clear-screen=false", this.entrypoint],
-      {
-        cwd: process.cwd(),
-        env: {
-          ...process.env,
-          AWS_LAMBDA_RUNTIME_API: this.runtimeApiUrl,
-          BB_FUNCTIONS_PHASE: "runtime",
-          NODE_ENV: "local",
-        },
-        stdio: ["ignore", "pipe", "pipe"],
+    this.process = spawn(process.execPath, [tsxCli, ...args], {
+      cwd: process.cwd(),
+      env: {
+        ...process.env,
+        AWS_LAMBDA_RUNTIME_API: this.runtimeApiUrl,
+        BB_FUNCTIONS_PHASE: "runtime",
+        NODE_ENV: "local",
       },
-    );
+      stdio: ["ignore", "pipe", "pipe"],
+    });
 
     // Handle stdout
     this.process.stdout?.on("data", (data) => {
