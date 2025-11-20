@@ -1,15 +1,61 @@
 import { defineFn } from "@browserbasehq/sdk-functions";
+import { chromium } from "playwright-core";
 
 // This is your first Browserbase function!
 // You can run it locally with: bb dev index.ts
 // Once ready, publish it with: bb publish index.ts
 
-defineFn("my-function", async () => {
-  // Your function logic goes here
-  // You can use the full power of Node.js and any npm packages
+type HNSubmission = {
+  title: string | null;
+  url: string | null;
+  rank: number;
+};
 
+defineFn("my-function", async (context) => {
+  const { session } = context;
+
+  console.log("Connecting to browser session:", session.id);
+
+  // Connect to the browser instance
+  const browser = await chromium.connectOverCDP(session.connectUrl);
+  const browserContext = browser.contexts()[0]!;
+  const page = browserContext.pages()[0]!;
+
+  // Navigate to Hacker News
+  console.log("Navigating to Hacker News...");
+  await page.goto("https://news.ycombinator.com");
+
+  // Wait for the content to load
+  await page.waitForSelector(".athing", { timeout: 30000 });
+
+  // Extract the first three submission titles
+  const titles = await page.evaluate(() => {
+    const results: HNSubmission[] = [];
+
+    document.querySelectorAll(".athing").forEach((submission, idx) => {
+      if (idx >= 3) return; // only return 3
+
+      const titleElement = submission.querySelector(".titleline > a");
+
+      if (titleElement) {
+        results.push({
+          title: titleElement.textContent ?? null,
+          url: titleElement.getAttribute("href"),
+          rank: idx + 1,
+        });
+      }
+    });
+
+    return results;
+  });
+
+  console.log(`Successfully extracted ${titles.length} titles`);
+
+  // Return the results
   return {
-    message: "Hello from Browserbase!",
-    timestamp: new Date().toISOString()
+    message: "Successfully fetched top Hacker News stories",
+    timestamp: new Date().toISOString(),
+    results: titles,
   };
 });
+
