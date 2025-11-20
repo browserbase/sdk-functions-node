@@ -15,9 +15,38 @@ export interface UploadResult {
 
 export type BuildStatus = "RUNNING" | "COMPLETED" | "FAILED";
 
+export interface FunctionCreatedVersion {
+  id: string;
+  projectId: string;
+  functionId: string;
+  functionBuildId: string;
+  sessionCreateParams?: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BuiltFunction {
+  id: string;
+  projectId: string;
+  name: string;
+  createdVersion: FunctionCreatedVersion;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface BuildStatusResponse {
   id: string;
+  projectId: string;
   status: BuildStatus;
+  request: {
+    entrypoint: string;
+  };
+  createdAt: string;
+  updatedAt: string;
+  startedAt: string;
+  endedAt?: string;
+  expiresAt: string;
+  builtFunctions?: BuiltFunction[];
 }
 
 export async function uploadBuild(
@@ -204,9 +233,12 @@ export async function pollBuildStatus(
   },
 ): Promise<BuildStatusResponse | null> {
   const intervalMs = options?.intervalMs ?? 2000; // Default 2 seconds
-  const maxAttempts = options?.maxAttempts ?? 60; // Default 2 minutes max (60 * 2s)
+  const maxAttempts = options?.maxAttempts ?? 100; // Default ~3 minutes max (100 * 2s)
 
   console.log(chalk.cyan("\nWaiting for build to complete..."));
+  console.log(
+    chalk.gray("(Builds typically take around 1 minute to complete)"),
+  );
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     const status = await getBuildStatus(config, buildId);
@@ -216,13 +248,13 @@ export async function pollBuildStatus(
       return null;
     }
 
-    // Show progress indicator
+    // Show progress indicator with clearer polling information
     process.stdout.write(
-      `\r${chalk.gray(`Status: ${status.status}... (${attempt + 1}/${maxAttempts})`)}`,
+      `\r${chalk.gray(`Status: ${status.status}... (polling ${attempt + 1}/${maxAttempts})`)}`,
     );
 
     if (status.status !== "RUNNING") {
-      process.stdout.write("\r" + " ".repeat(50) + "\r"); // Clear the progress line
+      process.stdout.write("\r" + " ".repeat(60) + "\r"); // Clear the progress line
 
       if (status.status === "COMPLETED") {
         console.log(chalk.green("✓ Build completed successfully"));
@@ -237,7 +269,12 @@ export async function pollBuildStatus(
     await new Promise((resolve) => setTimeout(resolve, intervalMs));
   }
 
-  process.stdout.write("\r" + " ".repeat(50) + "\r"); // Clear the progress line
-  console.error(chalk.yellow("Build is still running after maximum wait time"));
+  process.stdout.write("\r" + " ".repeat(60) + "\r"); // Clear the progress line
+  console.error(
+    chalk.yellow("Build is still running after maximum wait time (~3 minutes)"),
+  );
+  console.error(
+    chalk.yellow("Please check the dashboard for the current build status."),
+  );
   return null;
 }
