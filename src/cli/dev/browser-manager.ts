@@ -50,14 +50,14 @@ export class RemoteBrowserManager implements IRemoteBrowserManager {
   private initialized: boolean = false;
 
   constructor() {
-    const foundProjectId = process.env["BB_PROJECT_ID"];
-    const foundApiKey = process.env["BB_API_KEY"];
+    const foundProjectId = process.env["BROWSERBASE_PROJECT_ID"];
+    const foundApiKey = process.env["BROWSERBASE_API_KEY"];
 
     if (!foundProjectId || !foundApiKey) {
       console.error(
         chalk.red("✗ Browserbase credentials not found.\n") +
           chalk.red(
-            "  Please set BB_PROJECT_ID and BB_API_KEY in your .env file.\n",
+            "  Please set BROWSERBASE_PROJECT_ID and BROWSERBASE_API_KEY in your .env file.\n",
           ) +
           chalk.gray(
             "  Copy .env.example to .env and fill in your credentials.",

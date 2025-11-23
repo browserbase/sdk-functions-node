@@ -16,25 +16,33 @@ export function loadConfig(options: {
   apiUrl?: string;
 }): PublishConfig {
   // Get API key from environment
-  const apiKey = process.env["BB_API_KEY"];
+  const apiKey = process.env["BROWSERBASE_API_KEY"];
   if (!apiKey) {
     console.error(
-      chalk.red("Error: BB_API_KEY not found in environment variables."),
+      chalk.red(
+        "Error: BROWSERBASE_API_KEY not found in environment variables.",
+      ),
     );
     console.log(
-      chalk.gray("Please set BB_API_KEY in your .env file or environment."),
+      chalk.gray(
+        "Please set BROWSERBASE_API_KEY in your .env file or environment.",
+      ),
     );
     process.exit(1);
   }
 
   // Get project ID from environment
-  const projectId = process.env["BB_PROJECT_ID"];
+  const projectId = process.env["BROWSERBASE_PROJECT_ID"];
   if (!projectId) {
     console.error(
-      chalk.red("Error: BB_PROJECT_ID not found in environment variables."),
+      chalk.red(
+        "Error: BROWSERBASE_PROJECT_ID not found in environment variables.",
+      ),
     );
     console.log(
-      chalk.gray("Please set BB_PROJECT_ID in your .env file or environment."),
+      chalk.gray(
+        "Please set BROWSERBASE_PROJECT_ID in your .env file or environment.",
+      ),
     );
     process.exit(1);
   }
@@ -42,7 +50,7 @@ export function loadConfig(options: {
   // Use provided API URL or default
   const apiUrl =
     options.apiUrl ||
-    process.env["BB_API_URL"] ||
+    process.env["BROWSERBASE_API_BASE_URL"] ||
     "https://api.browserbase.com";
 
   // Use provided entrypoint or default to main.ts
