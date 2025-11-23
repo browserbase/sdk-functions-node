@@ -1,4 +1,5 @@
 import { IncomingMessage, ServerResponse } from "http";
+import { randomUUID } from "crypto";
 import { z } from "zod";
 import chalk from "chalk";
 import { type IInvocationBridge } from "../bridge.js";
@@ -169,7 +170,7 @@ export class DevServerHandlers implements IRequestHandlers {
       // Build context with the created session
       const context = validatedData.context || {
         invocation: {
-          id: crypto.randomUUID(),
+          id: randomUUID(),
           region: "local",
         },
         session: session,
