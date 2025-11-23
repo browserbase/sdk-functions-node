@@ -131,7 +131,7 @@ if [ -f .env ]; then
 fi
 
 # Create .env with missing API key (only project ID)
-echo "BB_PROJECT_ID=test_project" > .env
+echo "BROWSERBASE_PROJECT_ID=test_project" >.env
 
 if pnpm bb publish "$ENTRYPOINT" >publish-output.log 2>&1; then
   print_error "Publish should fail without API key"
@@ -162,7 +162,7 @@ if [ -f .env ]; then
 fi
 
 # Create .env with missing project ID (only API key)
-echo "BB_API_KEY=test_api_key" > .env
+echo "BROWSERBASE_API_KEY=test_api_key" >.env
 
 if pnpm bb publish "$ENTRYPOINT" >publish-output.log 2>&1; then
   print_error "Publish should fail without project ID"

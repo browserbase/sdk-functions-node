@@ -207,14 +207,14 @@ print_success "Dev server started successfully on port $PORT"
 
 # Wait for function to be registered (poll for non-404 response)
 print_info "Waiting for function '$PRIMARY_FUNCTION' to be registered..."
-FUNCTION_READY_WAIT=15  # Wait up to 15 seconds for function registration
+FUNCTION_READY_WAIT=15 # Wait up to 15 seconds for function registration
 FUNCTION_WAIT_COUNT=0
 
 while [ $FUNCTION_WAIT_COUNT -lt $FUNCTION_READY_WAIT ]; do
   # Try to invoke the function and check if it's registered (non-404)
   FUNC_STATUS=$(curl -s -w "%{http_code}" -X POST "http://127.0.0.1:$PORT/v1/functions/$PRIMARY_FUNCTION/invoke" \
     -H "Content-Type: application/json" \
-    -H "x-bb-api-key: ${BB_API_KEY}" \
+    -H "x-bb-api-key: ${BROWSERBASE_API_KEY}" \
     -d '{"params": {}}' \
     -o /dev/null 2>/dev/null)
 
@@ -258,7 +258,7 @@ fi
 print_info "Test 2: Invoking '$PRIMARY_FUNCTION' function..."
 HTTP_STATUS=$(curl -s -w "%{http_code}" -X POST "http://127.0.0.1:$PORT/v1/functions/$PRIMARY_FUNCTION/invoke" \
   -H "Content-Type: application/json" \
-  -H "x-bb-api-key: ${BB_API_KEY}" \
+  -H "x-bb-api-key: ${BROWSERBASE_API_KEY}" \
   -d '{"params": {}}' \
   -o dev-response.json)
 
@@ -284,7 +284,7 @@ if [ ${#FUNCTION_NAMES[@]} -gt 1 ]; then
     print_info "  Invoking '$func' function..."
     HTTP_STATUS=$(curl -s -w "%{http_code}" -X POST "http://127.0.0.1:$PORT/v1/functions/$func/invoke" \
       -H "Content-Type: application/json" \
-      -H "x-bb-api-key: ${BB_API_KEY}" \
+      -H "x-bb-api-key: ${BROWSERBASE_API_KEY}" \
       -d '{"params": {}}' \
       -o dev-response-$func.json)
 
@@ -302,7 +302,7 @@ print_info "Test 3: Testing invalid function endpoint..."
 INVALID_STATUS=$(curl -s -w "%{http_code}" -X POST \
   "http://127.0.0.1:$PORT/v1/functions/nonexistent/invoke" \
   -H "Content-Type: application/json" \
-  -H "x-bb-api-key: ${BB_API_KEY}" \
+  -H "x-bb-api-key: ${BROWSERBASE_API_KEY}" \
   -d '{"params": {}}' \
   -o /dev/null)
 
