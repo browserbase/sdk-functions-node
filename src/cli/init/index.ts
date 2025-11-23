@@ -189,6 +189,9 @@ function updatePackageManager(
       packageManager === "pnpm" ? "pnpm@9.0.0" : "npm@10.0.0";
   }
 
+  // Add "type": "module" to support ES modules
+  packageJson.type = "module";
+
   writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
   console.log(
     chalk.green(`✓ Package manager set to ${packageJson.packageManager}`),
@@ -212,6 +215,12 @@ function installDependencies(
 
   console.log(chalk.gray("  Installing playwright-core..."));
   execSync(`${installCmd} playwright-core`, {
+    cwd: targetDir,
+    stdio: "pipe",
+  });
+
+  console.log(chalk.gray("  Installing zod..."));
+  execSync(`${installCmd} zod`, {
     cwd: targetDir,
     stdio: "pipe",
   });
