@@ -1,4 +1,5 @@
 import { describe, it, beforeEach } from "node:test";
+import assert from "node:assert";
 import { IncomingMessage, ServerResponse } from "node:http";
 import { Socket } from "node:net";
 
@@ -6,7 +7,6 @@ import { type RequestHandlerDeps, handleRequest } from "./server.js";
 import type { IInvocationBridge } from "./bridge.js";
 import type { IRemoteBrowserManager } from "./browser-manager.js";
 import type { IRequestHandlers } from "./handlers/index.js";
-import assert from "node:assert";
 
 /**
  * Creates a mock implementation of IRequestHandlers
