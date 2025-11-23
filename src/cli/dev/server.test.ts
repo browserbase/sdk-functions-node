@@ -1,5 +1,4 @@
 import { describe, it, beforeEach } from "node:test";
-import { expect } from "@std/expect";
 import { IncomingMessage, ServerResponse } from "node:http";
 import { Socket } from "node:net";
 
@@ -7,6 +6,7 @@ import { type RequestHandlerDeps, handleRequest } from "./server.js";
 import type { IInvocationBridge } from "./bridge.js";
 import type { IRemoteBrowserManager } from "./browser-manager.js";
 import type { IRequestHandlers } from "./handlers/index.js";
+import assert from "node:assert";
 
 /**
  * Creates a mock implementation of IRequestHandlers
@@ -329,19 +329,34 @@ describe("handleRequest", () => {
 
       await handleRequest(req, res, deps);
 
-      expect(res.setHeaderCalls.length).toBeGreaterThan(0);
-      expect(res.setHeaderCalls).toContainEqual([
-        "Access-Control-Allow-Origin",
-        "*",
-      ]);
-      expect(res.setHeaderCalls).toContainEqual([
-        "Access-Control-Allow-Methods",
-        "GET, POST, OPTIONS",
-      ]);
-      expect(res.setHeaderCalls).toContainEqual([
-        "Access-Control-Allow-Headers",
-        "Content-Type",
-      ]);
+      assert.ok(res.setHeaderCalls.length > 0);
+      assert.ok(
+        res.setHeaderCalls.some(
+          (call) =>
+            JSON.stringify(call) ===
+            JSON.stringify(["Access-Control-Allow-Origin", "*"]),
+        ),
+        "Expected CORS origin header",
+      );
+      assert.ok(
+        res.setHeaderCalls.some(
+          (call) =>
+            JSON.stringify(call) ===
+            JSON.stringify([
+              "Access-Control-Allow-Methods",
+              "GET, POST, OPTIONS",
+            ]),
+        ),
+        "Expected CORS methods header",
+      );
+      assert.ok(
+        res.setHeaderCalls.some(
+          (call) =>
+            JSON.stringify(call) ===
+            JSON.stringify(["Access-Control-Allow-Headers", "Content-Type"]),
+        ),
+        "Expected CORS headers header",
+      );
     });
 
     it("should handle OPTIONS preflight requests", async () => {
@@ -350,8 +365,18 @@ describe("handleRequest", () => {
 
       await handleRequest(req, res, deps);
 
-      expect(res.writeHeadCalls).toContainEqual([200]);
-      expect(res.endCalls).toContainEqual([undefined]);
+      assert.ok(
+        res.writeHeadCalls.some(
+          (call) => JSON.stringify(call) === JSON.stringify([200]),
+        ),
+        "Expected 200 status code",
+      );
+      assert.ok(
+        res.endCalls.some(
+          (call) => JSON.stringify(call) === JSON.stringify([undefined]),
+        ),
+        "Expected end call with undefined",
+      );
     });
   });
 
@@ -362,9 +387,9 @@ describe("handleRequest", () => {
 
       await handleRequest(req, res, deps);
 
-      expect(mockHandlers.handleInvocationNextCalls.length).toBe(1);
-      expect(mockHandlers.handleInvocationNextCalls[0]?.[0]).toBe(req);
-      expect(mockHandlers.handleInvocationNextCalls[0]?.[1]).toBe(res);
+      assert.strictEqual(mockHandlers.handleInvocationNextCalls.length, 1);
+      assert.strictEqual(mockHandlers.handleInvocationNextCalls[0]?.[0], req);
+      assert.strictEqual(mockHandlers.handleInvocationNextCalls[0]?.[1], res);
     });
   });
 
@@ -375,10 +400,13 @@ describe("handleRequest", () => {
 
       await handleRequest(req, res, deps);
 
-      expect(mockHandlers.handleFunctionInvokeCalls.length).toBe(1);
-      expect(mockHandlers.handleFunctionInvokeCalls[0]?.[0]).toBe(req);
-      expect(mockHandlers.handleFunctionInvokeCalls[0]?.[1]).toBe(res);
-      expect(mockHandlers.handleFunctionInvokeCalls[0]?.[2]).toBe("myFunction");
+      assert.strictEqual(mockHandlers.handleFunctionInvokeCalls.length, 1);
+      assert.strictEqual(mockHandlers.handleFunctionInvokeCalls[0]?.[0], req);
+      assert.strictEqual(mockHandlers.handleFunctionInvokeCalls[0]?.[1], res);
+      assert.strictEqual(
+        mockHandlers.handleFunctionInvokeCalls[0]?.[2],
+        "myFunction",
+      );
     });
 
     it("should handle function names with special characters", async () => {
@@ -387,8 +415,9 @@ describe("handleRequest", () => {
 
       await handleRequest(req, res, deps);
 
-      expect(mockHandlers.handleFunctionInvokeCalls.length).toBe(1);
-      expect(mockHandlers.handleFunctionInvokeCalls[0]?.[2]).toBe(
+      assert.strictEqual(mockHandlers.handleFunctionInvokeCalls.length, 1);
+      assert.strictEqual(
+        mockHandlers.handleFunctionInvokeCalls[0]?.[2],
         "my-function_123",
       );
     });
@@ -401,10 +430,17 @@ describe("handleRequest", () => {
 
       await handleRequest(req, res, deps);
 
-      expect(mockHandlers.handleInvocationResponseCalls.length).toBe(1);
-      expect(mockHandlers.handleInvocationResponseCalls[0]?.[0]).toBe(req);
-      expect(mockHandlers.handleInvocationResponseCalls[0]?.[1]).toBe(res);
-      expect(mockHandlers.handleInvocationResponseCalls[0]?.[2]).toBe(
+      assert.strictEqual(mockHandlers.handleInvocationResponseCalls.length, 1);
+      assert.strictEqual(
+        mockHandlers.handleInvocationResponseCalls[0]?.[0],
+        req,
+      );
+      assert.strictEqual(
+        mockHandlers.handleInvocationResponseCalls[0]?.[1],
+        res,
+      );
+      assert.strictEqual(
+        mockHandlers.handleInvocationResponseCalls[0]?.[2],
         "req-123",
       );
     });
@@ -416,8 +452,11 @@ describe("handleRequest", () => {
 
       await handleRequest(req, res, deps);
 
-      expect(mockHandlers.handleInvocationResponseCalls.length).toBe(1);
-      expect(mockHandlers.handleInvocationResponseCalls[0]?.[2]).toBe(uuid);
+      assert.strictEqual(mockHandlers.handleInvocationResponseCalls.length, 1);
+      assert.strictEqual(
+        mockHandlers.handleInvocationResponseCalls[0]?.[2],
+        uuid,
+      );
     });
   });
 
@@ -428,10 +467,13 @@ describe("handleRequest", () => {
 
       await handleRequest(req, res, deps);
 
-      expect(mockHandlers.handleInvocationErrorCalls.length).toBe(1);
-      expect(mockHandlers.handleInvocationErrorCalls[0]?.[0]).toBe(req);
-      expect(mockHandlers.handleInvocationErrorCalls[0]?.[1]).toBe(res);
-      expect(mockHandlers.handleInvocationErrorCalls[0]?.[2]).toBe("req-456");
+      assert.strictEqual(mockHandlers.handleInvocationErrorCalls.length, 1);
+      assert.strictEqual(mockHandlers.handleInvocationErrorCalls[0]?.[0], req);
+      assert.strictEqual(mockHandlers.handleInvocationErrorCalls[0]?.[1], res);
+      assert.strictEqual(
+        mockHandlers.handleInvocationErrorCalls[0]?.[2],
+        "req-456",
+      );
     });
   });
 
@@ -442,15 +484,27 @@ describe("handleRequest", () => {
 
       await handleRequest(req, res, deps);
 
-      expect(res.writeHeadCalls).toContainEqual([
-        404,
-        {
-          "Content-Type": "application/json",
-        },
-      ]);
-      expect(res.endCalls).toContainEqual([
-        JSON.stringify({ error: "Not found" }),
-      ]);
+      assert.ok(
+        res.writeHeadCalls.some(
+          (call) =>
+            JSON.stringify(call) ===
+            JSON.stringify([
+              404,
+              {
+                "Content-Type": "application/json",
+              },
+            ]),
+        ),
+        "Expected 404 with JSON content type",
+      );
+      assert.ok(
+        res.endCalls.some(
+          (call) =>
+            JSON.stringify(call) ===
+            JSON.stringify([JSON.stringify({ error: "Not found" })]),
+        ),
+        "Expected Not found error",
+      );
     });
 
     it("should return 404 for unknown POST routes", async () => {
@@ -459,15 +513,27 @@ describe("handleRequest", () => {
 
       await handleRequest(req, res, deps);
 
-      expect(res.writeHeadCalls).toContainEqual([
-        404,
-        {
-          "Content-Type": "application/json",
-        },
-      ]);
-      expect(res.endCalls).toContainEqual([
-        JSON.stringify({ error: "Not found" }),
-      ]);
+      assert.ok(
+        res.writeHeadCalls.some(
+          (call) =>
+            JSON.stringify(call) ===
+            JSON.stringify([
+              404,
+              {
+                "Content-Type": "application/json",
+              },
+            ]),
+        ),
+        "Expected 404 with JSON content type",
+      );
+      assert.ok(
+        res.endCalls.some(
+          (call) =>
+            JSON.stringify(call) ===
+            JSON.stringify([JSON.stringify({ error: "Not found" })]),
+        ),
+        "Expected Not found error",
+      );
     });
 
     it("should return 404 for incorrect method on known routes", async () => {
@@ -476,15 +542,27 @@ describe("handleRequest", () => {
 
       await handleRequest(req, res, deps);
 
-      expect(res.writeHeadCalls).toContainEqual([
-        404,
-        {
-          "Content-Type": "application/json",
-        },
-      ]);
-      expect(res.endCalls).toContainEqual([
-        JSON.stringify({ error: "Not found" }),
-      ]);
+      assert.ok(
+        res.writeHeadCalls.some(
+          (call) =>
+            JSON.stringify(call) ===
+            JSON.stringify([
+              404,
+              {
+                "Content-Type": "application/json",
+              },
+            ]),
+        ),
+        "Expected 404 with JSON content type",
+      );
+      assert.ok(
+        res.endCalls.some(
+          (call) =>
+            JSON.stringify(call) ===
+            JSON.stringify([JSON.stringify({ error: "Not found" })]),
+        ),
+        "Expected Not found error",
+      );
     });
   });
 
@@ -500,15 +578,29 @@ describe("handleRequest", () => {
 
       await handleRequest(req, res, deps);
 
-      expect(res.writeHeadCalls).toContainEqual([
-        500,
-        {
-          "Content-Type": "application/json",
-        },
-      ]);
-      expect(res.endCalls).toContainEqual([
-        JSON.stringify({ error: "Internal server error" }),
-      ]);
+      assert.ok(
+        res.writeHeadCalls.some(
+          (call) =>
+            JSON.stringify(call) ===
+            JSON.stringify([
+              500,
+              {
+                "Content-Type": "application/json",
+              },
+            ]),
+        ),
+        "Expected 500 with JSON content type",
+      );
+      assert.ok(
+        res.endCalls.some(
+          (call) =>
+            JSON.stringify(call) ===
+            JSON.stringify([
+              JSON.stringify({ error: "Internal server error" }),
+            ]),
+        ),
+        "Expected Internal server error",
+      );
     });
 
     it("should handle malformed URLs gracefully", async () => {
@@ -518,17 +610,28 @@ describe("handleRequest", () => {
       await handleRequest(req, res, deps);
 
       // Should still set CORS headers
-      expect(res.setHeaderCalls).toContainEqual([
-        "Access-Control-Allow-Origin",
-        "*",
-      ]);
+      assert.ok(
+        res.setHeaderCalls.some(
+          (call) =>
+            JSON.stringify(call) ===
+            JSON.stringify(["Access-Control-Allow-Origin", "*"]),
+        ),
+        "Expected CORS origin header even with malformed URL",
+      );
       // Should return 404 as it doesn't match any route
-      expect(res.writeHeadCalls).toContainEqual([
-        404,
-        {
-          "Content-Type": "application/json",
-        },
-      ]);
+      assert.ok(
+        res.writeHeadCalls.some(
+          (call) =>
+            JSON.stringify(call) ===
+            JSON.stringify([
+              404,
+              {
+                "Content-Type": "application/json",
+              },
+            ]),
+        ),
+        "Expected 404 with JSON content type",
+      );
     });
 
     it("should handle missing host header", async () => {
@@ -539,9 +642,9 @@ describe("handleRequest", () => {
       await handleRequest(req, res, deps);
 
       // Should still work without host header
-      expect(mockHandlers.handleInvocationNextCalls.length).toBe(1);
-      expect(mockHandlers.handleInvocationNextCalls[0]?.[0]).toBe(req);
-      expect(mockHandlers.handleInvocationNextCalls[0]?.[1]).toBe(res);
+      assert.strictEqual(mockHandlers.handleInvocationNextCalls.length, 1);
+      assert.strictEqual(mockHandlers.handleInvocationNextCalls[0]?.[0], req);
+      assert.strictEqual(mockHandlers.handleInvocationNextCalls[0]?.[1], res);
     });
   });
 
@@ -552,15 +655,27 @@ describe("handleRequest", () => {
 
       await handleRequest(req, res, deps);
 
-      expect(res.writeHeadCalls).toContainEqual([
-        404,
-        {
-          "Content-Type": "application/json",
-        },
-      ]);
-      expect(res.endCalls).toContainEqual([
-        JSON.stringify({ error: "Not found" }),
-      ]);
+      assert.ok(
+        res.writeHeadCalls.some(
+          (call) =>
+            JSON.stringify(call) ===
+            JSON.stringify([
+              404,
+              {
+                "Content-Type": "application/json",
+              },
+            ]),
+        ),
+        "Expected 404 with JSON content type",
+      );
+      assert.ok(
+        res.endCalls.some(
+          (call) =>
+            JSON.stringify(call) ===
+            JSON.stringify([JSON.stringify({ error: "Not found" })]),
+        ),
+        "Expected Not found error",
+      );
     });
 
     it("should handle undefined URL", async () => {
@@ -569,15 +684,27 @@ describe("handleRequest", () => {
 
       await handleRequest(req, res, deps);
 
-      expect(res.writeHeadCalls).toContainEqual([
-        404,
-        {
-          "Content-Type": "application/json",
-        },
-      ]);
-      expect(res.endCalls).toContainEqual([
-        JSON.stringify({ error: "Not found" }),
-      ]);
+      assert.ok(
+        res.writeHeadCalls.some(
+          (call) =>
+            JSON.stringify(call) ===
+            JSON.stringify([
+              404,
+              {
+                "Content-Type": "application/json",
+              },
+            ]),
+        ),
+        "Expected 404 with JSON content type",
+      );
+      assert.ok(
+        res.endCalls.some(
+          (call) =>
+            JSON.stringify(call) ===
+            JSON.stringify([JSON.stringify({ error: "Not found" })]),
+        ),
+        "Expected Not found error",
+      );
     });
 
     it("should handle undefined method (defaults to GET)", async () => {
@@ -586,15 +713,27 @@ describe("handleRequest", () => {
 
       await handleRequest(req, res, deps);
 
-      expect(res.writeHeadCalls).toContainEqual([
-        404,
-        {
-          "Content-Type": "application/json",
-        },
-      ]);
-      expect(res.endCalls).toContainEqual([
-        JSON.stringify({ error: "Not found" }),
-      ]);
+      assert.ok(
+        res.writeHeadCalls.some(
+          (call) =>
+            JSON.stringify(call) ===
+            JSON.stringify([
+              404,
+              {
+                "Content-Type": "application/json",
+              },
+            ]),
+        ),
+        "Expected 404 with JSON content type",
+      );
+      assert.ok(
+        res.endCalls.some(
+          (call) =>
+            JSON.stringify(call) ===
+            JSON.stringify([JSON.stringify({ error: "Not found" })]),
+        ),
+        "Expected Not found error",
+      );
     });
 
     it("should handle URLs with query parameters", async () => {
@@ -603,8 +742,11 @@ describe("handleRequest", () => {
 
       await handleRequest(req, res, deps);
 
-      expect(mockHandlers.handleFunctionInvokeCalls.length).toBe(1);
-      expect(mockHandlers.handleFunctionInvokeCalls[0]?.[2]).toBe("testFunc");
+      assert.strictEqual(mockHandlers.handleFunctionInvokeCalls.length, 1);
+      assert.strictEqual(
+        mockHandlers.handleFunctionInvokeCalls[0]?.[2],
+        "testFunc",
+      );
     });
 
     it("should handle URLs with hash fragments", async () => {
@@ -613,9 +755,9 @@ describe("handleRequest", () => {
 
       await handleRequest(req, res, deps);
 
-      expect(mockHandlers.handleInvocationNextCalls.length).toBe(1);
-      expect(mockHandlers.handleInvocationNextCalls[0]?.[0]).toBe(req);
-      expect(mockHandlers.handleInvocationNextCalls[0]?.[1]).toBe(res);
+      assert.strictEqual(mockHandlers.handleInvocationNextCalls.length, 1);
+      assert.strictEqual(mockHandlers.handleInvocationNextCalls[0]?.[0], req);
+      assert.strictEqual(mockHandlers.handleInvocationNextCalls[0]?.[1], res);
     });
   });
 });
