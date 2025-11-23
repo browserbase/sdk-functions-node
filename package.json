@@ -40,6 +40,7 @@
   "packageManager": "pnpm@10.12.1",
   "devDependencies": {
     "@eslint/js": "^9.35.0",
+    "@std/expect": "jsr:^1.0.17",
     "@types/archiver": "^7.0.0",
     "@types/node": "^24.3.1",
     "eslint": "^9.35.0",
@@ -54,7 +55,6 @@
   },
   "dependencies": {
     "@browserbasehq/sdk": "^2.6.0",
-    "@std/expect": "jsr:^1.0.17",
     "archiver": "^7.0.1",
     "chalk": "^5.6.2",
     "commander": "^14.0.2",
