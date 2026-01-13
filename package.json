@@ -1,6 +1,6 @@
 {
   "name": "@browserbasehq/sdk-functions",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "",
   "type": "module",
   "exports": {
@@ -14,7 +14,7 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "bb": "./dist/cli.js"
+    "bb": "dist/cli.js"
   },
   "files": [
     "dist"
