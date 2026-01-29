@@ -1,6 +1,7 @@
 import chalk from "chalk";
 
 import { type PublishConfig } from "./config.js";
+import { parseErrorResponse, pollUntil } from "../shared/index.js";
 
 export interface BuildMetadata {
   entrypoint: string;
@@ -103,34 +104,7 @@ export async function uploadBuild(
 
     // Handle response
     if (!response.ok) {
-      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-
-      try {
-        const errorBody = await response.json();
-        if (
-          typeof errorBody === "object" &&
-          errorBody !== null &&
-          ("message" in errorBody || "error" in errorBody)
-        ) {
-          const typedErrorBody = errorBody as {
-            message?: string;
-            error?: string;
-          };
-          errorMessage =
-            typedErrorBody.message || typedErrorBody.error || errorMessage;
-        }
-      } catch {
-        // If response is not JSON, try text
-        try {
-          const textBody = await response.text();
-          if (textBody) {
-            errorMessage = textBody;
-          }
-        } catch {
-          // Keep default error message
-        }
-      }
-
+      const errorMessage = await parseErrorResponse(response);
       console.error(chalk.red(`Upload failed: ${errorMessage}`));
       return {
         success: false,
@@ -232,49 +206,30 @@ export async function pollBuildStatus(
     maxAttempts?: number;
   },
 ): Promise<BuildStatusResponse | null> {
-  const intervalMs = options?.intervalMs ?? 2000; // Default 2 seconds
-  const maxAttempts = options?.maxAttempts ?? 100; // Default ~3 minutes max (100 * 2s)
-
-  console.log(chalk.cyan("\nWaiting for build to complete..."));
   console.log(
     chalk.gray("(Builds typically take around 1 minute to complete)"),
   );
 
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const status = await getBuildStatus(config, buildId);
+  const result = await pollUntil(
+    () => getBuildStatus(config, buildId),
+    (status) => status.status !== "RUNNING",
+    (status) => status.status,
+    {
+      intervalMs: options?.intervalMs ?? 2000,
+      maxAttempts: options?.maxAttempts ?? 100,
+      waitingMessage: "Waiting for build to complete...",
+      timeoutMessage:
+        "Build is still running after maximum wait time (~3 minutes). Please check the dashboard for the current build status.",
+    },
+  );
 
-    if (!status) {
-      console.error(chalk.red("Failed to get build status"));
-      return null;
+  if (result) {
+    if (result.status === "COMPLETED") {
+      console.log(chalk.green("✓ Build completed successfully"));
+    } else if (result.status === "FAILED") {
+      console.error(chalk.red("✗ Build failed"));
     }
-
-    // Show progress indicator with clearer polling information
-    process.stdout.write(
-      `\r${chalk.gray(`Status: ${status.status}... (polling ${attempt + 1}/${maxAttempts})`)}`,
-    );
-
-    if (status.status !== "RUNNING") {
-      process.stdout.write("\r" + " ".repeat(60) + "\r"); // Clear the progress line
-
-      if (status.status === "COMPLETED") {
-        console.log(chalk.green("✓ Build completed successfully"));
-      } else if (status.status === "FAILED") {
-        console.error(chalk.red("✗ Build failed"));
-      }
-
-      return status;
-    }
-
-    // Wait before next poll
-    await new Promise((resolve) => setTimeout(resolve, intervalMs));
   }
 
-  process.stdout.write("\r" + " ".repeat(60) + "\r"); // Clear the progress line
-  console.error(
-    chalk.yellow("Build is still running after maximum wait time (~3 minutes)"),
-  );
-  console.error(
-    chalk.yellow("Please check the dashboard for the current build status."),
-  );
-  return null;
+  return result;
 }
