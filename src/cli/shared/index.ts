@@ -6,3 +6,11 @@ export {
   validateApiKeyFormat,
   loadBaseConfig,
 } from "./config.js";
+
+export {
+  parseErrorResponse,
+  apiGet,
+  apiPost,
+  pollUntil,
+  type PollOptions,
+} from "./api-client.js";
