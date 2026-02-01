@@ -17,8 +17,10 @@ program
 const validPackageManagers = ["npm", "pnpm"];
 
 program
-  .command("init <project-name>")
-  .description("Initialize a new Browserbase Functions project")
+  .command("init [project-name]")
+  .description(
+    "Initialize a new Browserbase Functions project (defaults to my-browserbase-function)",
+  )
   .option(
     "-p, --package-manager <manager>",
     `Package manager to use (${validPackageManagers.join(" or ")})`,
@@ -26,6 +28,7 @@ program
   )
   .action(async (projectName, options) => {
     try {
+      const finalProjectName = projectName || "my-browserbase-function";
       const packageManager = options.packageManager.toLowerCase();
 
       if (!validPackageManagers.includes(packageManager)) {
@@ -41,7 +44,7 @@ program
       }
 
       await init({
-        projectName: projectName,
+        projectName: finalProjectName,
         packageManager: packageManager as "npm" | "pnpm",
       });
     } catch (error) {
