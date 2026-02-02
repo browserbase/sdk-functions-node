@@ -134,4 +134,31 @@ program
     }
   });
 
+program
+  .command("invoke")
+  .description("Invoke a deployed Browserbase Function")
+  .argument("<functionId>", "The function ID to invoke")
+  .option("-p, --params <json>", "JSON parameters to pass to the function")
+  .option("-u, --api-url <url>", "API endpoint URL")
+  .option("--no-wait", "Don't wait for the invocation to complete")
+  .option(
+    "--check-status <invocationId>",
+    "Check the status of an existing invocation",
+  )
+  .action(async (functionId, options) => {
+    try {
+      const { invoke } = await import("./invoke/index.js");
+      await invoke({
+        functionId: functionId,
+        params: options.params,
+        apiUrl: options.apiUrl,
+        noWait: options.noWait,
+        checkStatus: options.checkStatus,
+      });
+    } catch (error) {
+      console.error(chalk.red("Invoke failed:"), error);
+      process.exit(1);
+    }
+  });
+
 program.parse();
