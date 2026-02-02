@@ -16,7 +16,7 @@ export interface InvocationResponse {
   status: InvocationStatus;
   params?: Record<string, unknown>;
   results?: Record<string, unknown>;
-  sessionId?: string;
+  sessionId: string;
   createdAt: string;
   updatedAt: string;
   startedAt?: string;
@@ -29,11 +29,11 @@ export interface InvokeOptions {
   params?: string;
   apiUrl?: string;
   noWait?: boolean;
-  status?: string;
+  checkStatus?: string;
 }
 
 function isTerminalStatus(status: InvocationStatus): boolean {
-  return status === "COMPLETED" || status === "FAILED" || status === "TIMEOUT";
+  return status !== "RUNNING" && status !== "PENDING";
 }
 
 function displayInvocationResult(invocation: InvocationResponse): void {
@@ -87,15 +87,15 @@ export async function invoke(options: InvokeOptions): Promise<void> {
       options.apiUrl ? { apiUrl: options.apiUrl } : undefined,
     );
 
-    // If --status flag is provided, just check status of existing invocation
-    if (options.status) {
+    // If --check-status flag is provided, just check status of existing invocation
+    if (options.checkStatus) {
       console.log(
-        chalk.gray(`Checking status for invocation: ${options.status}`),
+        chalk.gray(`Checking status for invocation: ${options.checkStatus}`),
       );
 
       const status = await apiGet<InvocationResponse>(
         config,
-        `/v1/functions/invocations/${options.status}`,
+        `/v1/functions/invocations/${options.checkStatus}`,
       );
 
       if (!status) {
@@ -150,7 +150,7 @@ export async function invoke(options: InvokeOptions): Promise<void> {
       console.log(chalk.gray(`\nInvocation ID: ${result.data.id}`));
       console.log(
         chalk.cyan(
-          `\nTo check status later, run:\n  bb invoke ${options.functionId} --status ${result.data.id}`,
+          `\nTo check status later, run:\n  bb invoke ${options.functionId} --check-status ${result.data.id}`,
         ),
       );
       return;
@@ -170,7 +170,7 @@ export async function invoke(options: InvokeOptions): Promise<void> {
         maxAttempts: 900,
         waitingMessage: "Waiting for invocation to complete...",
         timeoutMessage:
-          "Invocation is still running after maximum wait time. Use 'bb invoke --status <invocationId>' to check later.",
+          "Invocation is still running after maximum wait time. Use 'bb invoke --check-status <invocationId>' to check later.",
       },
     );
 

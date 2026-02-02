@@ -142,7 +142,7 @@ program
   .option("-u, --api-url <url>", "API endpoint URL")
   .option("--no-wait", "Don't wait for the invocation to complete")
   .option(
-    "-s, --status <invocationId>",
+    "--check-status <invocationId>",
     "Check the status of an existing invocation",
   )
   .action(async (functionId, options) => {
@@ -153,7 +153,7 @@ program
         params: options.params,
         apiUrl: options.apiUrl,
         noWait: options.noWait,
-        status: options.status,
+        checkStatus: options.checkStatus,
       });
     } catch (error) {
       console.error(chalk.red("Invoke failed:"), error);
