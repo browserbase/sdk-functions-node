@@ -130,12 +130,12 @@ defineFn(
 
 The `bb` CLI is included with the package.
 
-| Command | Description |
-| --- | --- |
-| `bb init [project-name]` | Scaffold a new project (defaults to `my-browserbase-function`) |
-| `bb dev <entrypoint>` | Start a local development server |
-| `bb publish <entrypoint>` | Deploy your function to Browserbase |
-| `bb invoke <functionId>` | Invoke a deployed function |
+| Command                   | Description                                                    |
+| ------------------------- | -------------------------------------------------------------- |
+| `bb init [project-name]`  | Scaffold a new project (defaults to `my-browserbase-function`) |
+| `bb dev <entrypoint>`     | Start a local development server                               |
+| `bb publish <entrypoint>` | Deploy your function to Browserbase                            |
+| `bb invoke <functionId>`  | Invoke a deployed function                                     |
 
 ### `bb init`
 
@@ -145,6 +145,7 @@ bb init my-project --package-manager npm
 ```
 
 Options:
+
 - `-p, --package-manager <manager>` — Package manager to use (`npm` or `pnpm`, defaults to `pnpm`)
 
 ### `bb dev`
@@ -155,6 +156,7 @@ bb dev index.ts --port 3000
 ```
 
 Options:
+
 - `-p, --port <number>` — Port to listen on (default: `14113`)
 - `-h, --host <string>` — Host to bind to (default: `127.0.0.1`)
 
@@ -166,6 +168,7 @@ bb publish index.ts --dry-run
 ```
 
 Options:
+
 - `--dry-run` — Show what would be published without uploading
 - `-u, --api-url <url>` — Custom API endpoint URL
 
@@ -177,6 +180,7 @@ bb invoke <functionId> --params '{"key": "value"}'
 ```
 
 Options:
+
 - `-p, --params <json>` — JSON parameters to pass to the function
 - `--no-wait` — Don't wait for the invocation to complete
 - `--check-status <invocationId>` — Check the status of an existing invocation
@@ -186,10 +190,10 @@ Options:
 
 Set your Browserbase credentials as environment variables or in a `.env` file:
 
-| Variable | Required | Description |
-| --- | --- | --- |
-| `BROWSERBASE_API_KEY` | Yes | Your Browserbase API key |
-| `BROWSERBASE_PROJECT_ID` | Yes | Your Browserbase project ID |
+| Variable                 | Required | Description                 |
+| ------------------------ | -------- | --------------------------- |
+| `BROWSERBASE_API_KEY`    | Yes      | Your Browserbase API key    |
+| `BROWSERBASE_PROJECT_ID` | Yes      | Your Browserbase project ID |
 
 Get your API key and project ID from [browserbase.com](https://browserbase.com).
 
