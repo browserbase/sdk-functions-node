@@ -117,6 +117,18 @@ export async function apiPost<T>(
   }
 }
 
+export type BuildStatus = "PENDING" | "RUNNING" | "COMPLETED" | "FAILED";
+
+export type InvocationStatus = "PENDING" | "RUNNING" | "COMPLETED" | "FAILED";
+
+export function isTerminalBuildStatus(status: BuildStatus): boolean {
+  return status !== "PENDING" && status !== "RUNNING";
+}
+
+export function isTerminalInvocationStatus(status: InvocationStatus): boolean {
+  return status !== "PENDING" && status !== "RUNNING";
+}
+
 export interface PollOptions {
   /** Polling interval in milliseconds */
   intervalMs?: number;

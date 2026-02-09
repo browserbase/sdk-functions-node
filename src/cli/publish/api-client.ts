@@ -1,7 +1,12 @@
 import chalk from "chalk";
 
 import { type PublishConfig } from "./config.js";
-import { parseErrorResponse, pollUntil } from "../shared/index.js";
+import {
+  parseErrorResponse,
+  pollUntil,
+  type BuildStatus,
+  isTerminalBuildStatus,
+} from "../shared/index.js";
 
 export interface BuildMetadata {
   entrypoint: string;
@@ -13,8 +18,6 @@ export interface UploadResult {
   success: boolean;
   message?: string;
 }
-
-export type BuildStatus = "RUNNING" | "COMPLETED" | "FAILED";
 
 export interface FunctionCreatedVersion {
   id: string;
@@ -212,7 +215,7 @@ export async function pollBuildStatus(
 
   const result = await pollUntil(
     () => getBuildStatus(config, buildId),
-    (status) => status.status !== "RUNNING",
+    (status) => isTerminalBuildStatus(status.status),
     (status) => status.status,
     {
       intervalMs: options?.intervalMs ?? 2000,
