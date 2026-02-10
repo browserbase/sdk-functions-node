@@ -123,8 +123,101 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Install jq
-        run: sudo apt-get update && sudo apt-get install -y jq
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup pnpm
+        run: |
+          corepack prepare pnpm@10.12.1 --activate
+          pnpm config set store-dir ~/.pnpm-store
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ matrix.node-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-${{ matrix.node-version }}-
+
+      - name: Install root dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build SDK
+        run: rm -rf dist && tsup
+
+      - name: Run integration tests
+        env:
+          BROWSERBASE_API_KEY: ${{ secrets.BB_INTEGRATION_TEST_API_KEY }}
+          BROWSERBASE_PROJECT_ID: ${{ secrets.BB_INTEGRATION_TEST_PROJECT_ID }}
+        run: pnpm run test:integration
+
+  build-flow-tests:
+    name: Build Flow Tests (Node ${{ matrix.node-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ["24.x"]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup pnpm
+        run: |
+          corepack prepare pnpm@10.12.1 --activate
+          pnpm config set store-dir ~/.pnpm-store
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ matrix.node-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-${{ matrix.node-version }}-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run build flow tests
+        run: pnpm run test:build-flow
+
+  live-build-tests:
+    name: Live Build Tests (Node ${{ matrix.node-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ["24.x"]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
 
       - name: Enable Corepack
         run: corepack enable
@@ -152,7 +245,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build SDK
-        run: pnpm run build
+        run: rm -rf dist && tsup
 
       - name: Install test dependencies
         run: |
@@ -163,12 +256,8 @@ jobs:
             fi
           done
 
-      - name: Make test scripts executable
-        run: chmod +x tests/*.sh
-
-      - name: Run all integration tests
-        working-directory: tests
+      - name: Run live build tests
         env:
           BROWSERBASE_API_KEY: ${{ secrets.BB_INTEGRATION_TEST_API_KEY }}
           BROWSERBASE_PROJECT_ID: ${{ secrets.BB_INTEGRATION_TEST_PROJECT_ID }}
-        run: ./run-all-tests.sh
+        run: pnpm run test:live-build

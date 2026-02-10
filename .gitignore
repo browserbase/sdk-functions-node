@@ -1,6 +1,7 @@
 node_modules/
 dist/
 dist-test/
+dist-integration-test/
 .browserbase/
 
 .env
@@ -21,11 +22,6 @@ test-ignore.txt
 .gitignore.test-marker
 test-gitignore-dir/
 
-# Test artifacts
-tests/*/.browserbase/
-tests/*/dev-server.log
-tests/*/dev-response.json
-tests/*/publish-output.log
-tests/*/test.log
-tests/*/.env.test
-tests/*/test-ignore.txt
+# Pack output
+*.tgz
+

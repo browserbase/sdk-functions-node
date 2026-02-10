@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist-integration-test",
+    "rootDir": ".",
+    "noUnusedLocals": false,
+    "noUnusedParameters": false
+  },
+  "include": ["tests/integration/**/*.ts", "tests/build-flow/**/*.ts"],
+  "exclude": ["node_modules", "dist", "dist-test", "dist-integration-test"]
+}
