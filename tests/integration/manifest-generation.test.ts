@@ -150,7 +150,10 @@ describe("Manifest Generation", () => {
       });
 
       it("with-params-schema: manifest config includes parametersSchema with correct JSON Schema", () => {
-        const manifest = readManifest(projectDir, "sdk-e2e-with-params-schema.json");
+        const manifest = readManifest(
+          projectDir,
+          "sdk-e2e-with-params-schema.json",
+        );
         assert.equal(manifest.name, "sdk-e2e-with-params-schema");
         const schema = manifest.config.parametersSchema;
         assert.ok(schema, "parametersSchema should exist");
@@ -177,7 +180,10 @@ describe("Manifest Generation", () => {
       });
 
       it("custom-browser-config: manifest config includes sessionConfig.browserSettings.advancedStealth", () => {
-        const manifest = readManifest(projectDir, "sdk-e2e-custom-browser-config.json");
+        const manifest = readManifest(
+          projectDir,
+          "sdk-e2e-custom-browser-config.json",
+        );
         assert.equal(manifest.name, "sdk-e2e-custom-browser-config");
         assert.equal(
           manifest.config.sessionConfig.browserSettings.advancedStealth,
@@ -203,7 +209,10 @@ describe("Manifest Generation", () => {
       });
 
       it("nested-entrypoint: manifest generated correctly despite src/index.ts path", () => {
-        const manifest = readManifest(projectDir, "sdk-e2e-nested-entrypoint.json");
+        const manifest = readManifest(
+          projectDir,
+          "sdk-e2e-nested-entrypoint.json",
+        );
         assert.equal(manifest.name, "sdk-e2e-nested-entrypoint");
         assert.ok(manifest.config, "config should exist");
       });

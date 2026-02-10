@@ -99,9 +99,7 @@ export function setupTemplateProject(
   template: Template,
   tarballPath: string,
 ): string {
-  const tempDir = mkdtempSync(
-    join(tmpdir(), `bb-test-${template.name}-`),
-  );
+  const tempDir = mkdtempSync(join(tmpdir(), `bb-test-${template.name}-`));
 
   // Copy template contents, excluding things we don't need in the project
   cpSync(template.dir, tempDir, {

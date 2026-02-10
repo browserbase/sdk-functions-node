@@ -149,7 +149,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build SDK
-        run: rm -rf dist && tsup
+        run: pnpm run build
 
       - name: Run integration tests
         run: pnpm run test:integration

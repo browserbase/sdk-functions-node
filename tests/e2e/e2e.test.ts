@@ -92,9 +92,7 @@ describe("E2E: Publish, Build, and Invoke", { concurrency: true }, () => {
         );
 
         const expectedName = `sdk-e2e-${template.name}`;
-        const builtFn = builtFunctions.find(
-          (f) => f["name"] === expectedName,
-        );
+        const builtFn = builtFunctions.find((f) => f["name"] === expectedName);
         assert.ok(
           builtFn,
           `Expected a function named "${expectedName}" in builtFunctions`,

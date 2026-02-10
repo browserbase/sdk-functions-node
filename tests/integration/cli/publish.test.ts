@@ -15,7 +15,6 @@ const templates = discoverTemplates();
 const tarballPath = getTarballPath();
 
 describe("Publish CLI", () => {
-
   for (const template of templates) {
     describe(template.name, () => {
       let projectDir: string;
@@ -122,10 +121,7 @@ describe("Publish CLI", () => {
         mkdirSync(testDirPath, { recursive: true });
         writeFileSync(join(testDirPath, "ignored.txt"), "ignored content");
 
-        writeFileSync(
-          gitignorePath,
-          ".env.test\n*.log\ntest-gitignore-dir/\n",
-        );
+        writeFileSync(gitignorePath, ".env.test\n*.log\ntest-gitignore-dir/\n");
         writeFileSync(markerPath, "");
 
         artifacts.push(

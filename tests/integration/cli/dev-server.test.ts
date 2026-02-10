@@ -67,7 +67,6 @@ function killProcess(proc: ChildProcess): Promise<void> {
 const tarballPath = getTarballPath();
 
 describe("Dev Server", () => {
-
   for (const template of templates) {
     describe(template.name, () => {
       let proc: ChildProcess | null = null;
