@@ -32,6 +32,7 @@ function startDevServer(
     {
       cwd,
       stdio: ["pipe", "pipe", "pipe"],
+      detached: true,
       env: {
         ...process.env,
         BROWSERBASE_API_KEY: API_KEY,
@@ -50,12 +51,32 @@ function killProcess(proc: ChildProcess): Promise<void> {
     }
 
     proc.on("exit", () => resolve());
-    proc.kill("SIGTERM");
+
+    // Kill the entire process group (npx -> node) so no orphans remain.
+    // The negative PID signals the whole group created by detached: true.
+    const pid = proc.pid;
+    if (pid) {
+      try {
+        process.kill(-pid, "SIGTERM");
+      } catch {
+        proc.kill("SIGTERM");
+      }
+    } else {
+      proc.kill("SIGTERM");
+    }
 
     // Force kill after 2 seconds
     setTimeout(() => {
       if (!proc.killed && proc.exitCode === null) {
-        proc.kill("SIGKILL");
+        if (pid) {
+          try {
+            process.kill(-pid, "SIGKILL");
+          } catch {
+            // already dead
+          }
+        } else {
+          proc.kill("SIGKILL");
+        }
       }
     }, 2000);
   });
