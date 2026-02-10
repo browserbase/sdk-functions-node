@@ -91,11 +91,13 @@ function displayBuildDetails(build: BuildStatusResponse): void {
 
     console.log(chalk.bold.cyan("\n✨ Next Steps"));
     console.log(chalk.gray("─".repeat(50)));
-    console.log(
-      chalk.white("Your functions are ready to be invoked! Invoke using cURL:"),
-    );
+    console.log(chalk.white("Your functions are ready to be invoked!"));
 
     build.builtFunctions.forEach((func) => {
+      console.log(chalk.white(`\nInvoke using the CLI:`));
+      console.log(chalk.gray(`\n   bb invoke ${func.id} --params '{}'`));
+
+      console.log(chalk.white(`\nOr using cURL:`));
       console.log(chalk.gray("\n   curl --request POST \\"));
       console.log(
         chalk.gray(
