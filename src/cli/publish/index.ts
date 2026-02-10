@@ -96,7 +96,7 @@ function displayBuildDetails(build: BuildStatusResponse): void {
     build.builtFunctions.forEach((func) => {
       console.log(chalk.white(`\nInvoke using the CLI:`));
       console.log(
-        chalk.gray(`\n   bb invoke ${func.id} --params '{"hello": "world"}'`),
+        chalk.gray(`\n   bb invoke ${func.id} --params '{}'`),
       );
 
       console.log(chalk.white(`\nOr using cURL:`));
