@@ -14,11 +14,8 @@ import {
 } from "../helpers.js";
 
 const templates = discoverTemplates();
-const HAS_REAL_CREDENTIALS = !!(
-  process.env["BROWSERBASE_API_KEY"] && process.env["BROWSERBASE_PROJECT_ID"]
-);
-const API_KEY = process.env["BROWSERBASE_API_KEY"] ?? "test_key";
-const PROJECT_ID = process.env["BROWSERBASE_PROJECT_ID"] ?? "test_project";
+const API_KEY = "test_key";
+const PROJECT_ID = "test_project";
 
 function getFunctionName(templateName: string): string {
   return `sdk-e2e-${templateName}`;
@@ -133,20 +130,11 @@ describe("Dev Server", () => {
           { "x-bb-api-key": API_KEY },
         );
 
-        if (HAS_REAL_CREDENTIALS) {
-          assert.ok(
-            invokeRes.statusCode === 200 || invokeRes.statusCode === 201,
-            `Invoke should return 200/201, got ${invokeRes.statusCode}.\nBody: ${invokeRes.body}\nLogs:\n${serverLogs}`,
-          );
-        } else {
-          // Without real Browserbase credentials, session creation fails but the
-          // function should still be found (i.e. not a 404).
-          assert.notEqual(
-            invokeRes.statusCode,
-            404,
-            `Function '${funcName}' should be registered.\nBody: ${invokeRes.body}\nLogs:\n${serverLogs}`,
-          );
-        }
+        assert.notEqual(
+          invokeRes.statusCode,
+          404,
+          `Function '${funcName}' should be registered.\nBody: ${invokeRes.body}\nLogs:\n${serverLogs}`,
+        );
       });
 
       it("returns 404 for nonexistent function", async () => {
