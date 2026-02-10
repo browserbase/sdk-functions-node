@@ -8,7 +8,7 @@ import {
   setupTemplateProject,
   cleanupDir,
   runBb,
-} from "./helpers.js";
+} from "../helpers.js";
 
 const templates = discoverTemplates();
 

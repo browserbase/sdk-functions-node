@@ -11,7 +11,7 @@ import {
   httpPost,
   waitForHealthcheck,
   waitForFunctionRegistration,
-} from "./helpers.js";
+} from "../helpers.js";
 
 const templates = discoverTemplates();
 const HAS_REAL_CREDENTIALS = !!(

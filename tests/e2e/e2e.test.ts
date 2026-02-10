@@ -1,12 +1,11 @@
 import { describe, it, before, after } from "node:test";
 import assert from "node:assert/strict";
-import { execSync } from "node:child_process";
+import { execSync, execFileSync } from "node:child_process";
 import { copyFileSync } from "node:fs";
 import { join, basename } from "node:path";
 
 import {
   requireCredentials,
-  bbApi,
   pollBuildStatus,
   API_KEY,
   PROJECT_ID,
@@ -101,20 +100,32 @@ describe("E2E: Publish, Build, and Invoke", { concurrency: true }, () => {
           `Expected a function named "${expectedName}" in builtFunctions`,
         );
 
-        // 5. Invoke the built function
+        // 5. Invoke the built function using the CLI
         const functionId = builtFn["id"] as string;
         assert.ok(functionId, "Function should have an id");
 
-        const invokeRes = bbApi(
-          "POST",
-          `/v1/functions/${functionId}/invoke`,
-          template.invokeParams,
-        );
+        const invokeArgs = ["bb", "invoke", functionId];
+        if (Object.keys(template.invokeParams as object).length > 0) {
+          invokeArgs.push("-p", JSON.stringify(template.invokeParams));
+        }
 
-        // 6. Assert success
+        // execFileSync avoids shell quoting issues with JSON params
+        const invokeOutput = execFileSync("npx", invokeArgs, {
+          cwd: projectDir,
+          encoding: "utf-8",
+          env: {
+            ...process.env,
+            BROWSERBASE_API_KEY: API_KEY,
+            BROWSERBASE_PROJECT_ID: PROJECT_ID,
+          },
+          stdio: ["pipe", "pipe", "pipe"],
+          timeout: 120_000,
+        });
+
+        // 6. bb invoke exits 0 on COMPLETED, 1 on FAILED (throws → test failure)
         assert.ok(
-          invokeRes.status >= 200 && invokeRes.status < 300,
-          `Invoke should succeed, got status ${invokeRes.status}: ${JSON.stringify(invokeRes.data)}`,
+          String(invokeOutput).includes("Invocation Details"),
+          `Invoke should produce details output: ${invokeOutput}`,
         );
       });
     });

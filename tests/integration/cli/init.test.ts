@@ -4,7 +4,7 @@ import { execSync } from "node:child_process";
 import { mkdtempSync, existsSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { runBb } from "./helpers.js";
+import { runBb } from "../helpers.js";
 
 const tempDirs: string[] = [];
 
