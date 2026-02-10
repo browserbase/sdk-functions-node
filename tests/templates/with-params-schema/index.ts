@@ -2,7 +2,7 @@ import { defineFn } from "@browserbasehq/sdk-functions";
 import z from "zod";
 
 defineFn(
-  "with-params-schema",
+  "sdk-e2e-with-params-schema",
   async (_ctx, params) => {
     const x = params.data;
     const returnValue = x * 2;

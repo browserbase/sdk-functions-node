@@ -10,7 +10,7 @@ const ApiResponseSchema = z.object({
 });
 
 defineFn(
-  "nested-entrypoint",
+  "sdk-e2e-nested-entrypoint",
   async (context) => {
     const { session } = context;
 

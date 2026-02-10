@@ -6,6 +6,6 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false
   },
-  "include": ["tests/integration/**/*.ts", "tests/build-flow/**/*.ts"],
+  "include": ["tests/integration/**/*.ts", "tests/e2e/**/*.ts"],
   "exclude": ["node_modules", "dist", "dist-test", "dist-integration-test"]
 }

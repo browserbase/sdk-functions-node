@@ -21,7 +21,7 @@ const API_KEY = process.env["BROWSERBASE_API_KEY"] ?? "test_key";
 const PROJECT_ID = process.env["BROWSERBASE_PROJECT_ID"] ?? "test_project";
 
 function getFunctionName(templateName: string): string {
-  return templateName;
+  return `sdk-e2e-${templateName}`;
 }
 
 function startDevServer(

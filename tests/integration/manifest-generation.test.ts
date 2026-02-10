@@ -16,7 +16,6 @@ const templatesWithExpected = templates.filter((t) => t.expectedDir !== null);
 const tarballPath = getTarballPath();
 
 describe("Manifest Generation", () => {
-
   for (const template of templatesWithExpected) {
     describe(template.name, () => {
       let projectDir: string;
@@ -127,9 +126,9 @@ describe("Manifest Generation", () => {
         cleanupDir(projectDir);
       });
 
-      it('basic: manifest is { "name": "basic", "config": {} }', () => {
-        const manifest = readManifest(projectDir, "basic.json");
-        assert.equal(manifest.name, "basic");
+      it('basic: manifest is { "name": "sdk-e2e-basic", "config": {} }', () => {
+        const manifest = readManifest(projectDir, "sdk-e2e-basic.json");
+        assert.equal(manifest.name, "sdk-e2e-basic");
         assert.deepStrictEqual(manifest.config, {});
       });
     }
@@ -151,8 +150,8 @@ describe("Manifest Generation", () => {
       });
 
       it("with-params-schema: manifest config includes parametersSchema with correct JSON Schema", () => {
-        const manifest = readManifest(projectDir, "with-params-schema.json");
-        assert.equal(manifest.name, "with-params-schema");
+        const manifest = readManifest(projectDir, "sdk-e2e-with-params-schema.json");
+        assert.equal(manifest.name, "sdk-e2e-with-params-schema");
         const schema = manifest.config.parametersSchema;
         assert.ok(schema, "parametersSchema should exist");
         assert.equal(schema.type, "object");
@@ -178,8 +177,8 @@ describe("Manifest Generation", () => {
       });
 
       it("custom-browser-config: manifest config includes sessionConfig.browserSettings.advancedStealth", () => {
-        const manifest = readManifest(projectDir, "custom-browser-config.json");
-        assert.equal(manifest.name, "custom-browser-config");
+        const manifest = readManifest(projectDir, "sdk-e2e-custom-browser-config.json");
+        assert.equal(manifest.name, "sdk-e2e-custom-browser-config");
         assert.equal(
           manifest.config.sessionConfig.browserSettings.advancedStealth,
           true,
@@ -204,8 +203,8 @@ describe("Manifest Generation", () => {
       });
 
       it("nested-entrypoint: manifest generated correctly despite src/index.ts path", () => {
-        const manifest = readManifest(projectDir, "nested-entrypoint.json");
-        assert.equal(manifest.name, "nested-entrypoint");
+        const manifest = readManifest(projectDir, "sdk-e2e-nested-entrypoint.json");
+        assert.equal(manifest.name, "sdk-e2e-nested-entrypoint");
         assert.ok(manifest.config, "config should exist");
       });
     }

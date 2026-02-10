@@ -1,4 +1,5 @@
 {
   "entrypoint": "index.ts",
-  "description": "Custom browser configuration test"
+  "description": "Custom browser configuration test",
+  "invokeParams": {}
 }

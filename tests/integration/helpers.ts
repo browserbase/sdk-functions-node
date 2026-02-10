@@ -27,6 +27,7 @@ export interface Template {
   dir: string;
   entrypoint: string;
   expectedDir: string | null;
+  invokeParams: unknown;
 }
 
 export function discoverTemplates(): Template[] {
@@ -42,6 +43,7 @@ export function discoverTemplates(): Template[] {
 
     const config = JSON.parse(readFileSync(configPath, "utf-8")) as {
       entrypoint: string;
+      invokeParams?: unknown;
     };
     const expectedDir = join(dir, "expected");
 
@@ -50,6 +52,7 @@ export function discoverTemplates(): Template[] {
       dir,
       entrypoint: config.entrypoint,
       expectedDir: existsSync(expectedDir) ? expectedDir : null,
+      invokeParams: config.invokeParams ?? {},
     });
   }
 

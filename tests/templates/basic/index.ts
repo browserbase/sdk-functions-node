@@ -1,5 +1,5 @@
 import { defineFn } from "@browserbasehq/sdk-functions";
 
-defineFn("basic", async () => {
+defineFn("sdk-e2e-basic", async () => {
   return { answer: "adam is cool" };
 });

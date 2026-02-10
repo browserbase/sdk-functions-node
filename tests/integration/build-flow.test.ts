@@ -1,4 +1,4 @@
-import { describe, it, before, after } from "node:test";
+import { describe, it, after } from "node:test";
 import assert from "node:assert/strict";
 import { execSync } from "node:child_process";
 import {
@@ -6,16 +6,15 @@ import {
   writeFileSync,
   readFileSync,
   existsSync,
-  rmSync,
   mkdirSync,
+  rmSync,
 } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 
-// Resolve the project root (3 levels up from dist-integration-test/tests/build-flow/)
-const PROJECT_ROOT = join(import.meta.dirname, "..", "..", "..");
+import { getTarballPath, PROJECT_ROOT } from "./helpers.js";
 
-let tarballPath: string;
+const tarballPath = getTarballPath();
 const tempDirs: string[] = [];
 
 function createTempDir(prefix: string): string {
@@ -66,28 +65,10 @@ function setupTempProject(
 }
 
 describe("Build Flow", () => {
-  before(() => {
-    // Pack the SDK (build is assumed to have been done by the npm script)
-    const packOutput = execSync("pnpm pack", {
-      cwd: PROJECT_ROOT,
-      encoding: "utf-8",
-      stdio: ["pipe", "pipe", "pipe"],
-    });
-
-    // pnpm pack outputs the tarball filename
-    const tarballName = String(packOutput).trim().split("\n").pop()!.trim();
-    tarballPath = join(PROJECT_ROOT, tarballName);
-    assert.ok(existsSync(tarballPath), `Tarball not found at ${tarballPath}`);
-  });
-
   after(() => {
     // Clean up temp directories
     for (const dir of tempDirs) {
       rmSync(dir, { recursive: true, force: true });
-    }
-    // Clean up tarball
-    if (tarballPath && existsSync(tarballPath)) {
-      rmSync(tarballPath);
     }
   });
 

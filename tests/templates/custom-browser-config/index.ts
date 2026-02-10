@@ -10,7 +10,7 @@ const ApiResponseSchema = z.object({
 });
 
 defineFn(
-  "custom-browser-config",
+  "sdk-e2e-custom-browser-config",
   async (context) => {
     const { session } = context;
 

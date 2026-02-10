@@ -1,4 +1,5 @@
 {
   "entrypoint": "src/index.ts",
-  "description": "Nested entrypoint test"
+  "description": "Nested entrypoint test",
+  "invokeParams": {}
 }
