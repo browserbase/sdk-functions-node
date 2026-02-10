@@ -1,0 +1,16 @@
+{
+  "name": "sdk-e2e-with-params-schema",
+  "config": {
+    "parametersSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "number"
+        }
+      },
+      "required": ["data"],
+      "additionalProperties": false
+    }
+  }
+}

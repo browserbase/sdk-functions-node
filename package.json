@@ -23,7 +23,7 @@
     "./dist/index.js"
   ],
   "scripts": {
-    "build": "$npm_execpath run lint && rm -rf dist && tsup",
+    "build": "rm -rf dist && tsup",
     "build:tests": "tsc --project tsconfig.test.json",
     "eslint": "eslint ./src",
     "eslint:fix": "eslint --fix ./src",
@@ -32,6 +32,13 @@
     "prettier:fix": "prettier . --write --cache",
     "test": "$npm_execpath build:tests && node --test dist-test/**/*.test.js",
     "test:only": "$npm_execpath build:tests && node --test-only --test dist-test/**/*.test.js",
+    "build:integration": "tsc --project tsconfig.integration.json",
+    "pretest:integration": "$npm_execpath run build && pnpm pack",
+    "test:integration": "$npm_execpath run build:integration && node --test --test-timeout 120000 dist-integration-test/tests/integration/**/*.test.js",
+    "posttest:integration": "rm -f browserbasehq-sdk-functions-*.tgz",
+    "pretest:e2e": "$npm_execpath run build && pnpm pack",
+    "test:e2e": "$npm_execpath run build:integration && node --test --test-timeout 300000 dist-integration-test/tests/e2e/**/*.test.js",
+    "posttest:e2e": "rm -f browserbasehq-sdk-functions-*.tgz",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [],

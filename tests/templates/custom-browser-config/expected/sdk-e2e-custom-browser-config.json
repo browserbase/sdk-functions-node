@@ -1,0 +1,10 @@
+{
+  "name": "sdk-e2e-custom-browser-config",
+  "config": {
+    "sessionConfig": {
+      "browserSettings": {
+        "advancedStealth": true
+      }
+    }
+  }
+}
