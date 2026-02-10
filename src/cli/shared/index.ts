@@ -13,4 +13,8 @@ export {
   apiPost,
   pollUntil,
   type PollOptions,
+  type BuildStatus,
+  type InvocationStatus,
+  isTerminalBuildStatus,
+  isTerminalInvocationStatus,
 } from "./api-client.js";

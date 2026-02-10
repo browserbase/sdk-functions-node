@@ -4,7 +4,7 @@
 
 The Browserbase Functions SDK lets you define, develop, and deploy serverless browser automation functions on [Browserbase](https://browserbase.com). Each function gets a managed browser session — write your automation logic, test it locally, and publish it to the cloud.
 
-The full documentation can be found on [docs.browserbase.com](https://docs.browserbase.com).
+The full documentation can be found on [docs.browserbase.com](https://docs.browserbase.com/functions/quickstart).
 
 ## Installation
 
@@ -103,7 +103,7 @@ defineFn(
 
 ### Custom Browser Configuration
 
-Pass `sessionConfig` to customize the browser session (uses the same options as the [Browserbase SDK session create params](https://docs.browserbase.com)):
+Pass `sessionConfig` to customize the browser session (uses the same options as the [Browserbase SDK session create params](https://docs.browserbase.com/reference/api/create-a-session)):
 
 ```ts
 import { defineFn } from "@browserbasehq/sdk-functions";

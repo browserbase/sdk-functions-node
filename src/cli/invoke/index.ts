@@ -1,13 +1,13 @@
 import chalk from "chalk";
 
-import { loadBaseConfig, apiGet, apiPost, pollUntil } from "../shared/index.js";
-
-export type InvocationStatus =
-  | "PENDING"
-  | "RUNNING"
-  | "COMPLETED"
-  | "FAILED"
-  | "TIMEOUT";
+import {
+  loadBaseConfig,
+  apiGet,
+  apiPost,
+  pollUntil,
+  type InvocationStatus,
+  isTerminalInvocationStatus,
+} from "../shared/index.js";
 
 export interface InvocationResponse {
   id: string;
@@ -30,10 +30,6 @@ export interface InvokeOptions {
   apiUrl?: string;
   noWait?: boolean;
   checkStatus?: string;
-}
-
-function isTerminalStatus(status: InvocationStatus): boolean {
-  return status !== "RUNNING" && status !== "PENDING";
 }
 
 function displayInvocationResult(invocation: InvocationResponse): void {
@@ -163,7 +159,7 @@ export async function invoke(options: InvokeOptions): Promise<void> {
           config,
           `/v1/functions/invocations/${result.data.id}`,
         ),
-      (status) => isTerminalStatus(status.status),
+      (status) => isTerminalInvocationStatus(status.status),
       (status) => status.status,
       {
         intervalMs: 1000,
@@ -183,13 +179,11 @@ export async function invoke(options: InvokeOptions): Promise<void> {
       console.log(chalk.green("✓ Invocation completed successfully"));
     } else if (finalStatus.status === "FAILED") {
       console.error(chalk.red("✗ Invocation failed"));
-    } else if (finalStatus.status === "TIMEOUT") {
-      console.error(chalk.red("✗ Invocation timed out"));
     }
 
     displayInvocationResult(finalStatus);
 
-    if (finalStatus.status === "FAILED" || finalStatus.status === "TIMEOUT") {
+    if (finalStatus.status === "FAILED") {
       process.exit(1);
     }
   } catch (error: unknown) {
