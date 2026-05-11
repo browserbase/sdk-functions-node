@@ -11,7 +11,6 @@ dotenv.config({ path: join(PROJECT_ROOT_LOCAL, ".env.e2e") });
 // ── Credentials ──────────────────────────────────────────────────
 
 export const API_KEY = process.env["BROWSERBASE_API_KEY"];
-export const PROJECT_ID = process.env["BROWSERBASE_PROJECT_ID"];
 export const API_URL =
   process.env["BROWSERBASE_API_URL"] ?? "https://api.browserbase.com";
 

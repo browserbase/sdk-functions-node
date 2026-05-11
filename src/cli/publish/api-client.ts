@@ -10,7 +10,6 @@ import {
 
 export interface BuildMetadata {
   entrypoint: string;
-  projectId?: string;
 }
 
 export interface UploadResult {
@@ -21,7 +20,6 @@ export interface UploadResult {
 
 export interface FunctionCreatedVersion {
   id: string;
-  projectId: string;
   functionId: string;
   functionBuildId: string;
   sessionCreateParams?: Record<string, unknown>;
@@ -31,7 +29,6 @@ export interface FunctionCreatedVersion {
 
 export interface BuiltFunction {
   id: string;
-  projectId: string;
   name: string;
   createdVersion: FunctionCreatedVersion;
   createdAt: string;
@@ -40,7 +37,6 @@ export interface BuiltFunction {
 
 export interface BuildStatusResponse {
   id: string;
-  projectId: string;
   status: BuildStatus;
   request: {
     entrypoint: string;
@@ -63,7 +59,6 @@ export async function uploadBuild(
   if (options?.dryRun) {
     console.log(chalk.cyan("\n[Dry run] Would upload to:"));
     console.log(chalk.gray(`  URL: ${config.apiUrl}/v1/functions/builds`));
-    console.log(chalk.gray(`  Project ID: ${config.projectId}`));
     console.log(chalk.gray(`  Entrypoint: ${config.entrypoint}`));
     console.log(
       chalk.gray(
@@ -85,7 +80,6 @@ export async function uploadBuild(
     // Add metadata
     const metadata: BuildMetadata = {
       entrypoint: config.entrypoint,
-      ...(config.projectId !== undefined && { projectId: config.projectId }),
     };
     formData.append("metadata", JSON.stringify(metadata));
 

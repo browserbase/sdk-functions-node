@@ -39,8 +39,6 @@ describe("Publish CLI", () => {
           env: {
             BROWSERBASE_API_KEY:
               process.env["BROWSERBASE_API_KEY"] ?? "test_key",
-            BROWSERBASE_PROJECT_ID:
-              process.env["BROWSERBASE_PROJECT_ID"] ?? "test_project",
           },
         });
 
@@ -84,7 +82,6 @@ describe("Publish CLI", () => {
           cwd: projectDir,
           env: {
             BROWSERBASE_API_KEY: "",
-            BROWSERBASE_PROJECT_ID: "test_project",
           },
         });
 
@@ -125,8 +122,6 @@ describe("Publish CLI", () => {
           env: {
             BROWSERBASE_API_KEY:
               process.env["BROWSERBASE_API_KEY"] ?? "test_key",
-            BROWSERBASE_PROJECT_ID:
-              process.env["BROWSERBASE_PROJECT_ID"] ?? "test_project",
           },
         });
 

@@ -34,14 +34,6 @@ export function requireApiKey(): string {
 }
 
 /**
- * Get the Browserbase project ID from environment, if set.
- * Returns undefined if not set — the API infers it from the API key.
- */
-export function getOptionalProjectId(): string | undefined {
-  return process.env["BROWSERBASE_PROJECT_ID"] || undefined;
-}
-
-/**
  * Get the API URL from options, environment, or use the default.
  */
 export function getApiUrl(override?: string): string {

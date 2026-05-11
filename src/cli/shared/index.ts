@@ -1,7 +1,6 @@
 export {
   type BaseConfig,
   requireApiKey,
-  getOptionalProjectId,
   getApiUrl,
   validateApiKeyFormat,
   loadBaseConfig,

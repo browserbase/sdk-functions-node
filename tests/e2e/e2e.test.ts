@@ -8,7 +8,6 @@ import {
   requireCredentials,
   pollBuildStatus,
   API_KEY,
-  PROJECT_ID,
   discoverTemplates,
   getTarballPath,
   setupTemplateProject,
@@ -63,7 +62,6 @@ describe("E2E: Publish, Build, and Invoke", { concurrency: true }, () => {
             env: {
               ...process.env,
               BROWSERBASE_API_KEY: API_KEY,
-              BROWSERBASE_PROJECT_ID: PROJECT_ID,
             },
             stdio: ["pipe", "pipe", "pipe"],
           },
@@ -114,7 +112,6 @@ describe("E2E: Publish, Build, and Invoke", { concurrency: true }, () => {
           env: {
             ...process.env,
             BROWSERBASE_API_KEY: API_KEY,
-            BROWSERBASE_PROJECT_ID: PROJECT_ID,
           },
           stdio: ["pipe", "pipe", "pipe"],
           timeout: 120_000,

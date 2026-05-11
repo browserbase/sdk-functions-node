@@ -200,5 +200,4 @@ jobs:
       - name: Run e2e tests
         env:
           BROWSERBASE_API_KEY: ${{ secrets.BB_INTEGRATION_TEST_API_KEY }}
-          BROWSERBASE_PROJECT_ID: ${{ secrets.BB_INTEGRATION_TEST_PROJECT_ID }}
         run: pnpm run test:e2e

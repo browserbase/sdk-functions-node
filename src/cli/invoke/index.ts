@@ -12,7 +12,6 @@ import {
 export interface InvocationResponse {
   id: string;
   functionId: string;
-  projectId: string;
   status: InvocationStatus;
   params?: Record<string, unknown>;
   results?: Record<string, unknown>;

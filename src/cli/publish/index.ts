@@ -20,7 +20,6 @@ function displayBuildDetails(build: BuildStatusResponse): void {
 
   // Display basic build information
   console.log(chalk.white(`Build ID: ${chalk.cyan(build.id)}`));
-  console.log(chalk.white(`Project ID: ${chalk.cyan(build.projectId)}`));
   console.log(chalk.white(`Status: ${chalk.green(build.status)}`));
 
   if (build.request?.entrypoint) {
@@ -101,7 +100,7 @@ function displayBuildDetails(build: BuildStatusResponse): void {
       console.log(chalk.gray("\n   curl --request POST \\"));
       console.log(
         chalk.gray(
-          `     --url ${func.projectId ? "https" : "http"}://api.browserbase.com/v1/functions/${func.id}/invoke \\`,
+          `     --url https://api.browserbase.com/v1/functions/${func.id}/invoke \\`,
         ),
       );
       console.log(
@@ -138,9 +137,6 @@ export async function publishFunction(options: PublishOptions): Promise<void> {
     console.log(chalk.gray(`Working directory: ${config.workingDirectory}`));
     console.log(chalk.gray(`Entrypoint: ${config.entrypoint}`));
     console.log(chalk.gray(`API URL: ${config.apiUrl}`));
-    if (config.projectId) {
-      console.log(chalk.gray(`Project ID: ${config.projectId}`));
-    }
 
     if (options.dryRun) {
       console.log(

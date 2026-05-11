@@ -5,7 +5,6 @@ import * as path from "node:path";
 import {
   type BaseConfig,
   requireApiKey,
-  getOptionalProjectId,
   getApiUrl,
   validateApiKeyFormat,
 } from "../shared/index.js";
@@ -14,7 +13,6 @@ import {
  * Extended configuration for publish command.
  */
 export interface PublishConfig extends BaseConfig {
-  projectId?: string;
   entrypoint: string;
   workingDirectory: string;
 }
@@ -24,7 +22,6 @@ export function loadConfig(options: {
   apiUrl?: string;
 }): PublishConfig {
   const apiKey = requireApiKey();
-  const projectId = getOptionalProjectId();
   const apiUrl = getApiUrl(options.apiUrl);
 
   // Use provided entrypoint or default to main.ts
@@ -52,7 +49,6 @@ export function loadConfig(options: {
 
   return {
     apiKey,
-    ...(projectId !== undefined && { projectId }),
     apiUrl,
     entrypoint,
     workingDirectory: process.cwd(),

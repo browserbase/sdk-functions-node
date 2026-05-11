@@ -15,7 +15,6 @@ import {
 
 const templates = discoverTemplates();
 const API_KEY = "test_key";
-const PROJECT_ID = "test_project";
 
 function getFunctionName(templateName: string): string {
   return `sdk-e2e-${templateName}`;
@@ -36,7 +35,6 @@ function startDevServer(
       env: {
         ...process.env,
         BROWSERBASE_API_KEY: API_KEY,
-        BROWSERBASE_PROJECT_ID: PROJECT_ID,
       },
     },
   );
