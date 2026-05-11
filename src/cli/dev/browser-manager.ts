@@ -55,9 +55,7 @@ export class RemoteBrowserManager implements IRemoteBrowserManager {
     if (!foundApiKey) {
       console.error(
         chalk.red("✗ Browserbase credentials not found.\n") +
-          chalk.red(
-            "  Please set BROWSERBASE_API_KEY in your .env file.\n",
-          ) +
+          chalk.red("  Please set BROWSERBASE_API_KEY in your .env file.\n") +
           chalk.gray(
             "  Copy .env.example to .env and fill in your credentials.",
           ),
