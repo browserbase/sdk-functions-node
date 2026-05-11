@@ -138,7 +138,9 @@ export async function publishFunction(options: PublishOptions): Promise<void> {
     console.log(chalk.gray(`Working directory: ${config.workingDirectory}`));
     console.log(chalk.gray(`Entrypoint: ${config.entrypoint}`));
     console.log(chalk.gray(`API URL: ${config.apiUrl}`));
-    console.log(chalk.gray(`Project ID: ${config.projectId}`));
+    if (config.projectId) {
+      console.log(chalk.gray(`Project ID: ${config.projectId}`));
+    }
 
     if (options.dryRun) {
       console.log(

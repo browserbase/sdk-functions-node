@@ -85,7 +85,7 @@ export async function uploadBuild(
     // Add metadata
     const metadata: BuildMetadata = {
       entrypoint: config.entrypoint,
-      projectId: config.projectId,
+      ...(config.projectId !== undefined && { projectId: config.projectId }),
     };
     formData.append("metadata", JSON.stringify(metadata));
 

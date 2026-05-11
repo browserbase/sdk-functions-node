@@ -91,18 +91,6 @@ describe("Publish CLI", () => {
         assert.notEqual(result.exitCode, 0, "Should fail without API key");
       });
 
-      it("missing project ID fails", () => {
-        const result = runBb(`publish ${template.entrypoint}`, {
-          cwd: projectDir,
-          env: {
-            BROWSERBASE_API_KEY: "test_key",
-            BROWSERBASE_PROJECT_ID: "",
-          },
-        });
-
-        assert.notEqual(result.exitCode, 0, "Should fail without project ID");
-      });
-
       it("gitignore patterns are respected", () => {
         // Create test artifacts that should be ignored
         const gitignorePath = join(projectDir, ".gitignore");

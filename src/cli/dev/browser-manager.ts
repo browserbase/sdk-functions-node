@@ -30,9 +30,9 @@ export interface IRemoteBrowserManager {
   closeSession(sessionId: string): Promise<void>;
 
   /**
-   * Get the project ID
+   * Get the project ID, if configured
    */
-  getProjectId(): string;
+  getProjectId(): string | undefined;
 
   /**
    * Check if the manager is initialized
@@ -45,19 +45,18 @@ export interface IRemoteBrowserManager {
  */
 export class RemoteBrowserManager implements IRemoteBrowserManager {
   private browserbaseClient: Browserbase | null = null;
-  private projectId: string;
+  private projectId: string | undefined;
   private apiKey: string;
   private initialized: boolean = false;
 
   constructor() {
-    const foundProjectId = process.env["BROWSERBASE_PROJECT_ID"];
     const foundApiKey = process.env["BROWSERBASE_API_KEY"];
 
-    if (!foundProjectId || !foundApiKey) {
+    if (!foundApiKey) {
       console.error(
         chalk.red("✗ Browserbase credentials not found.\n") +
           chalk.red(
-            "  Please set BROWSERBASE_PROJECT_ID and BROWSERBASE_API_KEY in your .env file.\n",
+            "  Please set BROWSERBASE_API_KEY in your .env file.\n",
           ) +
           chalk.gray(
             "  Copy .env.example to .env and fill in your credentials.",
@@ -66,7 +65,7 @@ export class RemoteBrowserManager implements IRemoteBrowserManager {
       throw new Error("Missing Browserbase credentials");
     }
 
-    this.projectId = foundProjectId;
+    this.projectId = process.env["BROWSERBASE_PROJECT_ID"] || undefined;
     this.apiKey = foundApiKey;
   }
 
@@ -98,7 +97,7 @@ export class RemoteBrowserManager implements IRemoteBrowserManager {
     console.log(chalk.cyan(`Creating browser session...`));
 
     const createdSession = await this.browserbaseClient.sessions.create({
-      projectId: this.projectId,
+      ...(this.projectId !== undefined && { projectId: this.projectId }),
       ...sessionConfig,
     });
 
@@ -122,7 +121,7 @@ export class RemoteBrowserManager implements IRemoteBrowserManager {
     try {
       console.log(chalk.cyan(`Closing browser session: ${sessionId}...`));
       await this.browserbaseClient.sessions.update(sessionId, {
-        projectId: this.projectId,
+        ...(this.projectId !== undefined && { projectId: this.projectId }),
         status: "REQUEST_RELEASE",
       });
       console.log(chalk.green(`✓ Browser session closed: ${sessionId}`));
@@ -136,9 +135,9 @@ export class RemoteBrowserManager implements IRemoteBrowserManager {
   }
 
   /**
-   * Get the project ID
+   * Get the project ID, if configured
    */
-  public getProjectId(): string {
+  public getProjectId(): string | undefined {
     return this.projectId;
   }
 
