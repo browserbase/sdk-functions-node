@@ -39,8 +39,6 @@ describe("Publish CLI", () => {
           env: {
             BROWSERBASE_API_KEY:
               process.env["BROWSERBASE_API_KEY"] ?? "test_key",
-            BROWSERBASE_PROJECT_ID:
-              process.env["BROWSERBASE_PROJECT_ID"] ?? "test_project",
           },
         });
 
@@ -84,23 +82,10 @@ describe("Publish CLI", () => {
           cwd: projectDir,
           env: {
             BROWSERBASE_API_KEY: "",
-            BROWSERBASE_PROJECT_ID: "test_project",
           },
         });
 
         assert.notEqual(result.exitCode, 0, "Should fail without API key");
-      });
-
-      it("missing project ID fails", () => {
-        const result = runBb(`publish ${template.entrypoint}`, {
-          cwd: projectDir,
-          env: {
-            BROWSERBASE_API_KEY: "test_key",
-            BROWSERBASE_PROJECT_ID: "",
-          },
-        });
-
-        assert.notEqual(result.exitCode, 0, "Should fail without project ID");
       });
 
       it("gitignore patterns are respected", () => {
@@ -137,8 +122,6 @@ describe("Publish CLI", () => {
           env: {
             BROWSERBASE_API_KEY:
               process.env["BROWSERBASE_API_KEY"] ?? "test_key",
-            BROWSERBASE_PROJECT_ID:
-              process.env["BROWSERBASE_PROJECT_ID"] ?? "test_project",
           },
         });
 

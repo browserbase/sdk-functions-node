@@ -233,10 +233,6 @@ class MockBrowserManager implements IRemoteBrowserManager {
     this.closeSessionCalls.push([sessionId]);
   }
 
-  getProjectId(): string {
-    return "test-project-id";
-  }
-
   isInitialized(): boolean {
     return true;
   }

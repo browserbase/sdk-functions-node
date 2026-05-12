@@ -69,7 +69,7 @@ describe("buildPersistedFunctionManifest", () => {
         parametersSchema: schema,
         sessionConfig: {
           browserSettings: {
-            fingerprint: { devices: ["desktop"] },
+            blockAds: true,
           },
         },
       },
@@ -81,7 +81,7 @@ describe("buildPersistedFunctionManifest", () => {
     assert(result.config.parametersSchema);
     assert.deepStrictEqual(result.config.sessionConfig, {
       browserSettings: {
-        fingerprint: { devices: ["desktop"] },
+        blockAds: true,
       },
     });
   });

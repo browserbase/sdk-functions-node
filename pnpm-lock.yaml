@@ -8,8 +8,8 @@ importers:
   .:
     dependencies:
       "@browserbasehq/sdk":
-        specifier: ^2.6.0
-        version: 2.6.0
+        specifier: ^2.10.0
+        version: 2.10.0
       archiver:
         specifier: ^7.0.1
         version: 7.0.1
@@ -67,10 +67,10 @@ importers:
         version: 8.42.0(eslint@9.35.0(jiti@2.5.1))(typescript@5.9.2)
 
 packages:
-  "@browserbasehq/sdk@2.6.0":
+  "@browserbasehq/sdk@2.10.0":
     resolution:
       {
-        integrity: sha512-83iXP5D7xMm8Wyn66TUaUrgoByCmAJuoMoZQI3sGg3JAiMlTfnCIMqyVBoNSaItaPIkaCnrsj6LiusmXV2X9YA==,
+        integrity: sha512-pOL4yW8P8AI2+N5y6zEP6XXKqIXtYyKunr1JXppqQDOyKLxxvZEDqQCHJXWUzqgx3R1tGWpn7m9AjXN7MeYInA==,
       }
 
   "@cspotcode/source-map-support@0.8.1":
@@ -2534,7 +2534,7 @@ packages:
       }
 
 snapshots:
-  "@browserbasehq/sdk@2.6.0":
+  "@browserbasehq/sdk@2.10.0":
     dependencies:
       "@types/node": 18.19.124
       "@types/node-fetch": 2.6.13

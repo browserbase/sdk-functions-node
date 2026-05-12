@@ -11,15 +11,12 @@ dotenv.config({ path: join(PROJECT_ROOT_LOCAL, ".env.e2e") });
 // ── Credentials ──────────────────────────────────────────────────
 
 export const API_KEY = process.env["BROWSERBASE_API_KEY"];
-export const PROJECT_ID = process.env["BROWSERBASE_PROJECT_ID"];
 export const API_URL =
   process.env["BROWSERBASE_API_URL"] ?? "https://api.browserbase.com";
 
 export function requireCredentials(): void {
-  if (!API_KEY || !PROJECT_ID) {
-    throw new Error(
-      "BROWSERBASE_API_KEY and BROWSERBASE_PROJECT_ID must be set for e2e tests",
-    );
+  if (!API_KEY) {
+    throw new Error("BROWSERBASE_API_KEY must be set for e2e tests");
   }
 }
 

@@ -34,28 +34,6 @@ export function requireApiKey(): string {
 }
 
 /**
- * Get the Browserbase project ID from environment.
- * Exits the process with an error message if not found.
- */
-export function requireProjectId(): string {
-  const projectId = process.env["BROWSERBASE_PROJECT_ID"];
-  if (!projectId) {
-    console.error(
-      chalk.red(
-        "Error: BROWSERBASE_PROJECT_ID not found in environment variables.",
-      ),
-    );
-    console.log(
-      chalk.gray(
-        "Please set BROWSERBASE_PROJECT_ID in your .env file or environment.",
-      ),
-    );
-    process.exit(1);
-  }
-  return projectId;
-}
-
-/**
  * Get the API URL from options, environment, or use the default.
  */
 export function getApiUrl(override?: string): string {

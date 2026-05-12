@@ -27,11 +27,10 @@ pnpm dlx @browserbasehq/sdk-functions init my-project
 cd my-project
 ```
 
-Add your Browserbase credentials to `.env`:
+Add your Browserbase API key to `.env`:
 
 ```sh
 BROWSERBASE_API_KEY=your_api_key_here
-BROWSERBASE_PROJECT_ID=your_project_id_here
 ```
 
 Start the local development server:
@@ -188,14 +187,13 @@ Options:
 
 ## Configuration
 
-Set your Browserbase credentials as environment variables or in a `.env` file:
+Set your Browserbase API key as an environment variable or in a `.env` file:
 
-| Variable                 | Required | Description                 |
-| ------------------------ | -------- | --------------------------- |
-| `BROWSERBASE_API_KEY`    | Yes      | Your Browserbase API key    |
-| `BROWSERBASE_PROJECT_ID` | Yes      | Your Browserbase project ID |
+| Variable              | Required | Description              |
+| --------------------- | -------- | ------------------------ |
+| `BROWSERBASE_API_KEY` | Yes      | Your Browserbase API key |
 
-Get your API key and project ID from [browserbase.com](https://browserbase.com).
+Get your API key from [browserbase.com](https://browserbase.com).
 
 ## Requirements
 
