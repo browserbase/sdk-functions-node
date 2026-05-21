@@ -73,6 +73,7 @@ export class ProcessManager implements IProcessManager {
     // Spawn tsx watch with the user's entrypoint
     this.process = spawn(process.execPath, [tsxCli, ...args], {
       cwd: process.cwd(),
+      detached: true,
       env: {
         ...process.env,
         AWS_LAMBDA_RUNTIME_API: this.runtimeApiUrl,
@@ -179,7 +180,11 @@ export class ProcessManager implements IProcessManager {
       const killTimeout = setTimeout(() => {
         if (this.process) {
           console.log(chalk.yellow("⚠️  Force killing runtime process"));
-          this.process.kill("SIGKILL");
+          try {
+            process.kill(-this.process.pid!, "SIGKILL");
+          } catch {
+            this.process.kill("SIGKILL");
+          }
         }
       }, 5000);
 
@@ -190,8 +195,14 @@ export class ProcessManager implements IProcessManager {
         resolve();
       });
 
-      // Try graceful shutdown first
-      this.process.kill("SIGTERM");
+      // Kill the entire process group (negative PID) so tsx watch's
+      // children are also cleaned up. Falls back to direct kill if
+      // the process group kill fails.
+      try {
+        process.kill(-this.process.pid!, "SIGTERM");
+      } catch {
+        this.process.kill("SIGTERM");
+      }
     });
   }
 
