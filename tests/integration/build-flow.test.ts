@@ -119,6 +119,49 @@ console.log("CJS_OK");
     assert.ok(String(output).includes("CJS_OK"), "CJS require should work");
   });
 
+  it("core subpath supports ESM import", () => {
+    const dir = createTempDir("core-esm");
+    setupTempProject(dir, {
+      type: "module",
+      files: {
+        "index.mjs": `
+import { FunctionsCoreError, publishFunction } from "@browserbasehq/sdk-functions/core";
+if (typeof publishFunction !== "function" || typeof FunctionsCoreError !== "function") {
+  process.exit(1);
+}
+console.log("CORE_ESM_OK");
+`,
+      },
+    });
+
+    const output = execSync("node index.mjs", {
+      cwd: dir,
+      encoding: "utf-8",
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+    assert.ok(String(output).includes("CORE_ESM_OK"));
+  });
+
+  it("core subpath supports CJS require", () => {
+    const dir = createTempDir("core-cjs");
+    setupTempProject(dir, {
+      files: {
+        "index.cjs": `
+const core = require("@browserbasehq/sdk-functions/core");
+if (typeof core.publishFunction !== "function") process.exit(1);
+console.log("CORE_CJS_OK");
+`,
+      },
+    });
+
+    const output = execSync("node index.cjs", {
+      cwd: dir,
+      encoding: "utf-8",
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+    assert.ok(String(output).includes("CORE_CJS_OK"));
+  });
+
   it("TypeScript declarations are present", () => {
     const dir = createTempDir("dts");
     setupTempProject(dir, {
@@ -144,8 +187,21 @@ console.log("CJS_OK");
       "index.d.cts",
     );
 
+    const coreDtsPath = join(
+      dir,
+      "node_modules",
+      "@browserbasehq",
+      "sdk-functions",
+      "dist",
+      "core.d.ts",
+    );
+
     assert.ok(existsSync(dtsPath), `.d.ts should exist at ${dtsPath}`);
     assert.ok(existsSync(dctsPath), `.d.cts should exist at ${dctsPath}`);
+    assert.ok(
+      existsSync(coreDtsPath),
+      `core .d.ts should exist at ${coreDtsPath}`,
+    );
   });
 
   it("bb CLI binary works", () => {
