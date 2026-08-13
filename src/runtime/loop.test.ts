@@ -33,6 +33,7 @@ describe("waitForAndHandleInvocation", () => {
           params: {},
           context: {
             session: { id: "session-123", connectUrl: "ws://test" },
+            secrets: {},
           },
         },
       };
@@ -120,6 +121,7 @@ describe("waitForAndHandleInvocation", () => {
           params: {},
           context: {
             session: { id: "session-456", connectUrl: "ws://test" },
+            secrets: {},
           },
         },
       };
@@ -196,6 +198,7 @@ describe("waitForAndHandleInvocation", () => {
           params: {},
           context: {
             session: { id: "session-789", connectUrl: "ws://test" },
+            secrets: {},
           },
         },
       };
@@ -329,6 +332,7 @@ describe("waitForAndHandleInvocation", () => {
           params: {},
           context: {
             session: { id: "session-321", connectUrl: "ws://test" },
+            secrets: {},
           },
         },
       };
@@ -393,6 +397,7 @@ describe("waitForAndHandleInvocation", () => {
           params: {},
           context: {
             session: { id: "session-654", connectUrl: "ws://test" },
+            secrets: {},
           },
         },
       };
