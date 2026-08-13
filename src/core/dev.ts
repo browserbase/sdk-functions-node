@@ -439,8 +439,12 @@ async function startServer(
       manifestStore,
       sessionManager,
     ).catch((error) => {
-      const message = `Functions dev request failed: ${formatErrorMessage(error)}`;
-      onLog?.({ level: "error", message, source: "server" });
+      const message = formatErrorMessage(error);
+      onLog?.({
+        level: "error",
+        message: `Functions dev request failed: ${message}`,
+        source: "server",
+      });
       if (!response.headersSent && !response.writableEnded) {
         sendJson(response, 500, { error: message }, baseCorsHeaders());
       } else if (!response.writableEnded) {
