@@ -14,7 +14,7 @@ export default defineConfig([
       index: "src/index.ts",
       core: "src/core/index.ts",
     },
-    dts: true, // emit .d.ts
+    dts: false,
     sourcemap: true,
     clean: true,
     format: ["esm", "cjs"], // dual package

@@ -5,19 +5,19 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
+      "types": "./dist/types/index.d.ts",
       "require": "./dist/index.cjs",
       "import": "./dist/index.js"
     },
     "./core": {
-      "types": "./dist/core.d.ts",
+      "types": "./dist/types/core/index.d.ts",
       "require": "./dist/core.cjs",
       "import": "./dist/core.js"
     }
   },
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/types/index.d.ts",
   "bin": {
     "bb": "dist/cli.js"
   },
@@ -28,7 +28,7 @@
     "./dist/index.js"
   ],
   "scripts": {
-    "build": "rm -rf dist && tsup",
+    "build": "rm -rf dist && tsup && tsc --project tsconfig.build.json",
     "build:tests": "tsc --project tsconfig.test.json",
     "eslint": "eslint ./src",
     "eslint:fix": "eslint --fix ./src",
@@ -40,10 +40,10 @@
     "test:only": "$npm_execpath build:tests && node --test-only --test dist-test/**/*.test.js",
     "build:integration": "tsc --project tsconfig.integration.json",
     "pretest:integration": "$npm_execpath run build && pnpm pack",
-    "test:integration": "$npm_execpath run build:integration && node --test --test-timeout 120000 dist-integration-test/tests/integration/**/*.test.js",
+    "test:integration": "$npm_execpath run build:integration && node --test --test-timeout 120000 dist-integration-test/tests/integration/build-flow.test.js dist-integration-test/tests/integration/manifest-generation.test.js dist-integration-test/tests/integration/cli/*.test.js",
     "posttest:integration": "rm -f browserbasehq-sdk-functions-*.tgz",
     "pretest:e2e": "$npm_execpath run build && pnpm pack",
-    "test:e2e": "$npm_execpath run build:integration && node --test --test-timeout 300000 dist-integration-test/tests/e2e/**/*.test.js",
+    "test:e2e": "$npm_execpath run build:integration && node --test --test-timeout 300000 dist-integration-test/tests/e2e/e2e.test.js",
     "posttest:e2e": "rm -f browserbasehq-sdk-functions-*.tgz",
     "typecheck": "tsc --noEmit"
   },
