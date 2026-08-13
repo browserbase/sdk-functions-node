@@ -8,10 +8,13 @@ const packageJson = JSON.parse(
 );
 
 export default defineConfig([
-  // Main SDK build
+  // Public library builds
   {
-    entry: ["src/index.ts"],
-    dts: true, // emit .d.ts
+    entry: {
+      index: "src/index.ts",
+      core: "src/core/index.ts",
+    },
+    dts: false,
     sourcemap: true,
     clean: true,
     format: ["esm", "cjs"], // dual package
@@ -42,6 +45,5 @@ export default defineConfig([
     minifyIdentifiers: true,
     minifySyntax: true,
     minifyWhitespace: true,
-    onSuccess: "cp -r src/cli/init/templates dist/",
   },
 ]);
