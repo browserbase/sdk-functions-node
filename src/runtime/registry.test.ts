@@ -12,6 +12,7 @@ const defaultMockContext: FunctionInvocationContext = {
     id: "session-456",
     connectUrl: "https://example.com/connect",
   },
+  secrets: {},
 };
 
 describe("FunctionRegistry", () => {

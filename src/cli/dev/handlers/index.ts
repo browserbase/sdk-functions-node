@@ -174,6 +174,7 @@ export class DevServerHandlers implements IRequestHandlers {
           region: "local",
         },
         session: session,
+        secrets: {},
       };
 
       // Always use the created session
