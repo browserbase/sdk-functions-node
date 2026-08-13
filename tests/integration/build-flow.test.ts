@@ -176,15 +176,8 @@ console.log("CORE_CJS_OK");
       "@browserbasehq",
       "sdk-functions",
       "dist",
+      "types",
       "index.d.ts",
-    );
-    const dctsPath = join(
-      dir,
-      "node_modules",
-      "@browserbasehq",
-      "sdk-functions",
-      "dist",
-      "index.d.cts",
     );
 
     const coreDtsPath = join(
@@ -193,15 +186,69 @@ console.log("CORE_CJS_OK");
       "@browserbasehq",
       "sdk-functions",
       "dist",
-      "core.d.ts",
+      "types",
+      "core",
+      "index.d.ts",
     );
 
     assert.ok(existsSync(dtsPath), `.d.ts should exist at ${dtsPath}`);
-    assert.ok(existsSync(dctsPath), `.d.cts should exist at ${dctsPath}`);
     assert.ok(
       existsSync(coreDtsPath),
       `core .d.ts should exist at ${coreDtsPath}`,
     );
+  });
+
+  it("core declarations compile for a TypeScript consumer", () => {
+    const dir = createTempDir("core-typescript");
+    setupTempProject(dir, {
+      type: "module",
+      extraDeps: ["typescript", "@types/node"],
+      files: {
+        "index.ts": `
+import {
+  FunctionsCoreError,
+  publishFunction,
+  type PublishFunctionResult,
+} from "@browserbasehq/sdk-functions/core";
+
+async function publish(): Promise<PublishFunctionResult> {
+  try {
+    return await publishFunction({ apiKey: "test", dryRun: true, entrypoint: "index.ts" });
+  } catch (error) {
+    if (error instanceof FunctionsCoreError) console.log(error.code);
+    throw error;
+  }
+}
+
+void publish;
+`,
+        "tsconfig.json": JSON.stringify({
+          compilerOptions: {
+            module: "NodeNext",
+            moduleResolution: "NodeNext",
+            noEmit: true,
+            strict: true,
+            target: "ES2022",
+            types: ["node"],
+          },
+          include: ["index.ts"],
+        }),
+      },
+    });
+
+    try {
+      execSync("npx tsc --project tsconfig.json", {
+        cwd: dir,
+        stdio: "pipe",
+      });
+    } catch (error) {
+      const output = error as { stderr?: Buffer; stdout?: Buffer };
+      assert.fail(
+        [output.stdout?.toString(), output.stderr?.toString()]
+          .filter(Boolean)
+          .join("\n"),
+      );
+    }
   });
 
   it("bb CLI binary works", () => {
