@@ -8,6 +8,11 @@
       "types": "./dist/index.d.ts",
       "require": "./dist/index.cjs",
       "import": "./dist/index.js"
+    },
+    "./core": {
+      "types": "./dist/core.d.ts",
+      "require": "./dist/core.cjs",
+      "import": "./dist/core.js"
     }
   },
   "main": "./dist/index.cjs",
@@ -30,6 +35,7 @@
     "lint": "$npm_execpath run eslint && $npm_execpath run prettier && $npm_execpath run typecheck",
     "prettier": "prettier . --check --cache",
     "prettier:fix": "prettier . --write --cache",
+    "prepare": "pnpm build",
     "test": "$npm_execpath build:tests && node --test dist-test/**/*.test.js",
     "test:only": "$npm_execpath build:tests && node --test-only --test dist-test/**/*.test.js",
     "build:integration": "tsc --project tsconfig.integration.json",
@@ -65,6 +71,7 @@
     "chalk": "^5.6.2",
     "commander": "^14.0.2",
     "dotenv": "^17.2.3",
+    "ignore": "^7.0.5",
     "tsx": "^4.20.5",
     "zod": "^4.1.5"
   }
