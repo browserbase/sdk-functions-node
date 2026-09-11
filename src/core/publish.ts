@@ -1,4 +1,4 @@
-import { relative, resolve } from "node:path";
+import { isAbsolute, relative, resolve, sep } from "node:path";
 
 import {
   createFunctionArchive,
@@ -80,14 +80,17 @@ export async function publishFunction(
   const cwd = resolve(options.cwd ?? process.cwd());
   const entrypoint = await resolveEntrypoint(options.entrypoint, cwd);
   const entrypointPath = relative(cwd, entrypoint);
+  assertProjectEntrypoint(entrypointPath);
   const config = resolveFunctionsApiConfig(options);
 
   if (options.dryRun) {
+    const files = await listFunctionArchiveEntries(cwd);
+    assertArchivedEntrypoint(entrypointPath, files);
     const result: PublishDryRunResult = {
       baseUrl: config.baseUrl,
       dryRun: true,
       entrypoint: entrypointPath,
-      files: await listFunctionArchiveEntries(cwd),
+      files,
     };
     if (options.projectId !== undefined) {
       result.projectId = options.projectId;
@@ -96,6 +99,7 @@ export async function publishFunction(
   }
 
   const archive = await createFunctionArchive(cwd);
+  assertArchivedEntrypoint(entrypointPath, archive.entries);
   const metadata: { entrypoint: string; projectId?: string } = {
     entrypoint: entrypointPath,
   };
@@ -145,6 +149,31 @@ export async function publishFunction(
   }
 
   return { build, dryRun: false };
+}
+
+function assertProjectEntrypoint(entrypointPath: string): void {
+  if (
+    entrypointPath === ".." ||
+    entrypointPath.startsWith(`..${sep}`) ||
+    isAbsolute(entrypointPath)
+  ) {
+    throw new FunctionsCoreError(
+      "The Functions entrypoint must be inside the project directory.",
+      { code: "invalid_entrypoint" },
+    );
+  }
+}
+
+function assertArchivedEntrypoint(
+  entrypointPath: string,
+  entries: string[],
+): void {
+  if (!entries.includes(entrypointPath)) {
+    throw new FunctionsCoreError(
+      "The Functions entrypoint is excluded from the publish archive.",
+      { code: "invalid_entrypoint" },
+    );
+  }
 }
 
 export async function getBuildStatus(

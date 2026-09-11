@@ -64,7 +64,17 @@ export async function createFunctionArchive(
         gzipOptions: { level: 9 },
       });
 
-      archive.on("data", (chunk: Buffer) => chunks.push(chunk));
+      let archiveSize = 0;
+      archive.on("data", (chunk: Buffer) => {
+        try {
+          archiveSize += chunk.length;
+          validateFunctionArchiveSize(archiveSize);
+          chunks.push(chunk);
+        } catch (error) {
+          archive.abort();
+          reject(error);
+        }
+      });
       archive.on("end", resolvePromise);
       archive.on("error", reject);
       archive.on("warning", (warning: Error & { code?: string }) => {
@@ -86,6 +96,14 @@ export async function createFunctionArchive(
     const buffer = Buffer.concat(chunks);
     validateFunctionArchiveSize(buffer.length);
     return { buffer, entries, size: buffer.length };
+  } catch (error) {
+    if (error instanceof FunctionsCoreError) {
+      throw error;
+    }
+    throw new FunctionsCoreError("Failed to create the Functions archive.", {
+      cause: error,
+      code: "archive_failed",
+    });
   } finally {
     if (generatedLockfilePath) {
       rmSync(dirname(generatedLockfilePath), { recursive: true, force: true });
@@ -121,10 +139,14 @@ function ensureArchiveLockfile(
   mkdirSync(tempDir, { recursive: true });
   copyFileSync(join(root, "package.json"), join(tempDir, "package.json"));
 
-  const result = spawnSync("npm", ["install", "--package-lock-only"], {
-    cwd: tempDir,
-    stdio: "pipe",
-  });
+  const result = spawnSync(
+    "npm",
+    ["install", "--package-lock-only", "--ignore-scripts"],
+    {
+      cwd: tempDir,
+      stdio: "pipe",
+    },
+  );
 
   if (result.error || result.status !== 0) {
     rmSync(tempDir, { recursive: true, force: true });
@@ -164,6 +186,9 @@ async function listArchiveEntries(
     const relativePath = relative(root, absolutePath) || ".";
     const ignorePath = entry.isDirectory() ? `${relativePath}/` : relativePath;
     if (relativePath !== "." && matcher.ignores(ignorePath)) {
+      continue;
+    }
+    if (entry.isSymbolicLink()) {
       continue;
     }
     if (entry.isDirectory()) {

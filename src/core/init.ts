@@ -127,7 +127,7 @@ export async function createFunctionProject(
   };
   for (const [name, contents] of Object.entries(files)) {
     const path = join(projectRoot, name);
-    await writeFile(path, contents);
+    await writeFile(path, contents, name === ".env" ? { mode: 0o600 } : {});
     options.onProgress?.({ path, type: "file-created" });
   }
 

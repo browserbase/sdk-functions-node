@@ -61,7 +61,7 @@ interface FunctionManifest {
   config?: { sessionConfig?: Record<string, unknown> };
 }
 
-class InvocationBridge {
+export class InvocationBridge {
   private cleanupSessionCallback:
     | ((sessionId: string) => Promise<void>)
     | null = null;
@@ -93,7 +93,14 @@ class InvocationBridge {
         JSON.stringify({ error: "Another runtime process connected." }),
       );
     }
-    this.nextConnection = { corsHeaders, response };
+    const connection = { corsHeaders, response };
+    response.once("close", () => {
+      if (this.nextConnection === connection) {
+        this.nextConnection = null;
+        this.runtimeConnected = false;
+      }
+    });
+    this.nextConnection = connection;
   }
 
   isRuntimeConnected(): boolean {

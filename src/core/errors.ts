@@ -1,4 +1,5 @@
 export type FunctionsCoreErrorCode =
+  | "archive_failed"
   | "archive_too_large"
   | "build_failed"
   | "build_missing_id"

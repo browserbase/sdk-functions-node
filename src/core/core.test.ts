@@ -1,11 +1,22 @@
 import assert from "node:assert/strict";
-import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { EventEmitter } from "node:events";
+import {
+  existsSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  symlinkSync,
+  writeFileSync,
+} from "node:fs";
 import { mkdtemp } from "node:fs/promises";
+import type { ServerResponse } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, it } from "node:test";
 
 import { FunctionsCoreError } from "./errors.js";
+import { createFunctionArchive } from "./archive.js";
+import { InvocationBridge } from "./dev.js";
 import { createFunctionProject } from "./init.js";
 import { invokeFunction } from "./invoke.js";
 import { publishFunction } from "./publish.js";
@@ -63,6 +74,85 @@ describe("Functions core", () => {
     assert.equal(packageJson.version, "1.0.0");
     assert.equal(packageJson.scripts.dev, "browse functions dev index.ts");
     assert.ok(existsSync(join(result.projectRoot, "index.ts")));
+    if (process.platform !== "win32") {
+      assert.equal(
+        statSync(join(result.projectRoot, ".env")).mode & 0o777,
+        0o600,
+      );
+    }
+  });
+
+  it("does not follow symlinks or run lifecycle scripts while archiving", async () => {
+    const cwd = await createTempDir("safe-archive");
+    const outside = await createTempDir("outside");
+    const secretPath = join(outside, "secret.txt");
+    const markerPath = join(outside, "preinstall-ran");
+    writeFileSync(secretPath, "secret\n");
+    symlinkSync(secretPath, join(cwd, "linked-secret.txt"));
+    writeFileSync(
+      join(cwd, "package.json"),
+      JSON.stringify({
+        name: "fixture",
+        scripts: {
+          preinstall: `node -e ${JSON.stringify(`require('node:fs').writeFileSync(${JSON.stringify(markerPath)}, 'ran')`)}`,
+        },
+        version: "1.0.0",
+      }),
+    );
+    writeFileSync(join(cwd, "index.ts"), "export {};\n");
+
+    const archive = await createFunctionArchive(cwd);
+
+    assert.ok(archive.entries.includes("package-lock.json"));
+    assert.ok(!archive.entries.includes("linked-secret.txt"));
+    assert.equal(existsSync(markerPath), false);
+  });
+
+  it("rejects entrypoints outside or excluded from the publish archive", async () => {
+    const cwd = await createTempDir("entrypoint-project");
+    const outside = await createTempDir("entrypoint-outside");
+    writeFileSync(
+      join(cwd, "package.json"),
+      JSON.stringify({ name: "fixture", version: "1.0.0" }),
+    );
+    writeFileSync(join(cwd, "index.ts"), "export {};\n");
+    writeFileSync(join(outside, "outside.ts"), "export {};\n");
+
+    await assert.rejects(
+      publishFunction({
+        apiKey: "test",
+        cwd,
+        dryRun: true,
+        entrypoint: join(outside, "outside.ts"),
+      }),
+      (error: unknown) =>
+        error instanceof FunctionsCoreError &&
+        error.code === "invalid_entrypoint",
+    );
+
+    writeFileSync(join(cwd, ".gitignore"), "index.ts\n");
+    await assert.rejects(
+      publishFunction({
+        apiKey: "test",
+        cwd,
+        dryRun: true,
+        entrypoint: "index.ts",
+      }),
+      (error: unknown) =>
+        error instanceof FunctionsCoreError &&
+        error.code === "invalid_entrypoint",
+    );
+  });
+
+  it("forgets a runtime next connection when the client disconnects", () => {
+    const bridge = new InvocationBridge();
+    const response = new EventEmitter() as EventEmitter & ServerResponse;
+    bridge.holdNextConnection(response, {});
+    assert.equal(bridge.isRuntimeConnected(), true);
+
+    response.emit("close");
+
+    assert.equal(bridge.isRuntimeConnected(), false);
   });
 
   it("publishes and polls through the injected transport", async () => {
