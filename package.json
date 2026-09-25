@@ -67,5 +67,9 @@
     "dotenv": "^17.2.3",
     "tsx": "^4.20.5",
     "zod": "^4.1.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/browserbase/sdk-functions-node.git"
   }
 }
