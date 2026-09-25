@@ -12,12 +12,10 @@ concurrency:
 
 jobs:
   publish:
-    # Only the upstream repository's main branch may publish.
     if: >-
       github.repository == 'browserbase/sdk-functions-node' &&
       github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    # Configure required BB reviewers and a main-only deployment rule in GitHub.
     environment: npm-publish
     permissions:
       contents: read
@@ -40,7 +38,6 @@ jobs:
         with:
           version: 10.12.1
 
-      # npm trusted publishing requires npm >= 11.5.1.
       - name: Setup npm for trusted publishing
         run: npm install --global npm@11
 
