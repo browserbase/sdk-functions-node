@@ -1,0 +1,4 @@
+# pnpm settings for this project. This file does not make the project a workspace.
+# pnpm 11 and later fail installs unless esbuild's build script is allowed.
+allowBuilds:
+  esbuild: true

@@ -73,6 +73,9 @@ export async function init(options: InitOptions) {
     // Step 5: Detect and update package manager
     const packageManager = detectPackageManager(options.packageManager);
     updatePackageManager(targetDir, packageManager);
+    if (packageManager === "pnpm") {
+      createPnpmWorkspaceFile(targetDir);
+    }
 
     // Step 6: Install dependencies
     console.log(chalk.gray("Installing dependencies..."));
@@ -108,19 +111,37 @@ export async function init(options: InitOptions) {
     console.log(chalk.gray("1. Navigate to your project:"));
     console.log(chalk.white(`   cd ${options.projectName}`));
     console.log(
-      chalk.gray("2. Add your Browserbase API key and project ID to .env"),
+      chalk.gray("2. Add your Browserbase and OpenAI API keys to .env"),
     );
-    console.log(chalk.gray("3. Run your function locally:"));
+    console.log(
+      chalk.gray(
+        "3. Upload the Stagehand extension, then paste its ID into stagehand.ts:",
+      ),
+    );
+    console.log(
+      chalk.white(
+        "   browse cloud extensions upload node_modules/@browserbasehq/stagehand/dist/assets/stagehand-extension.zip",
+      ),
+    );
+    console.log(chalk.gray("4. Run your function locally:"));
     console.log(
       chalk.white(
         `   ${packageManager === "pnpm" ? "pnpm" : "npx"} bb dev index.ts`,
       ),
     );
-    console.log(chalk.gray("4. When ready, publish your function:"));
+    console.log(chalk.gray("5. When ready, publish your function:"));
     console.log(
       chalk.white(
         `   ${packageManager === "pnpm" ? "pnpm" : "npx"} bb publish index.ts`,
       ),
+    );
+    console.log(
+      chalk.gray(
+        "6. Create BROWSERBASE_API_KEY and OPENAI_API_KEY project secrets and attach them to the function:",
+      ),
+    );
+    console.log(
+      chalk.white("   browse functions secrets attach <functionId> <secretId>"),
     );
     console.log("");
     console.log(chalk.gray("Learn more at https://browserbase.com/docs"));
@@ -192,6 +213,9 @@ function updatePackageManager(
   // Add "type": "module" to support ES modules
   packageJson.type = "module";
 
+  // pnpm 11 init adds devEngines.packageManager. npm rejects it, and it conflicts with packageManager.
+  delete packageJson.devEngines;
+
   writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
   console.log(
     chalk.green(`✓ Package manager set to ${packageJson.packageManager}`),
@@ -208,29 +232,77 @@ function installDependencies(
 
   // Install regular dependencies
   console.log(chalk.gray("  Installing @browserbasehq/sdk-functions..."));
-  execSync(`${installCmd} @browserbasehq/sdk-functions`, {
-    cwd: targetDir,
-    stdio: "pipe",
-  });
+  runInstallCommand(`${installCmd} @browserbasehq/sdk-functions`, targetDir);
 
-  console.log(chalk.gray("  Installing playwright-core..."));
-  execSync(`${installCmd} playwright-core`, {
-    cwd: targetDir,
-    stdio: "pipe",
-  });
+  console.log(chalk.gray("  Installing @browserbasehq/stagehand..."));
+  runInstallCommand(`${installCmd} @browserbasehq/stagehand`, targetDir);
 
+  // Two zod copies make schemas passed to Stagehand fail type checks, so match Stagehand's version.
+  const zodVersion = readStagehandZodVersion(targetDir);
   console.log(chalk.gray("  Installing zod..."));
-  execSync(`${installCmd} zod`, {
-    cwd: targetDir,
-    stdio: "pipe",
-  });
+  runInstallCommand(
+    `${installCmd} ${zodVersion ? `zod@${zodVersion}` : "zod"}`,
+    targetDir,
+  );
 
   // Install dev dependencies
   console.log(chalk.gray("  Installing TypeScript and type definitions..."));
-  execSync(`${installDevCmd} typescript @types/node`, {
-    cwd: targetDir,
-    stdio: "pipe",
-  });
+  runInstallCommand(`${installDevCmd} typescript @types/node`, targetDir);
+}
+
+function readStagehandZodVersion(targetDir: string): string | undefined {
+  try {
+    const stagehandPackageJson = JSON.parse(
+      readFileSync(
+        join(
+          targetDir,
+          "node_modules",
+          "@browserbasehq",
+          "stagehand",
+          "package.json",
+        ),
+        "utf-8",
+      ),
+    );
+    const version = stagehandPackageJson.dependencies?.zod;
+    return typeof version === "string" ? version : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function runInstallCommand(command: string, cwd: string) {
+  try {
+    execSync(command, { cwd, stdio: "pipe" });
+  } catch (error) {
+    // execSync's message has only stderr. The package manager often writes the real error to stdout.
+    const { stdout, stderr } = error as { stdout?: Buffer; stderr?: Buffer };
+    const output = [stdout, stderr]
+      .map((stream) => stream?.toString().trim())
+      .filter(Boolean)
+      .join("\n");
+    throw new Error(
+      `Command failed: ${command}${output ? `\n${output}` : ""}`,
+      {
+        cause: error,
+      },
+    );
+  }
+}
+
+function createPnpmWorkspaceFile(targetDir: string) {
+  const workspacePath = join(targetDir, "pnpm-workspace.yaml");
+  if (!existsSync(workspacePath)) {
+    const templatePath = join(
+      __dirname,
+      "templates",
+      "pnpm-workspace.yaml.template",
+    );
+    copyFileSync(templatePath, workspacePath);
+    console.log(chalk.green("✓ pnpm-workspace.yaml file created"));
+  } else {
+    console.log(chalk.yellow("✓ pnpm-workspace.yaml file already exists"));
+  }
 }
 
 function createEnvFile(targetDir: string) {
@@ -267,6 +339,15 @@ function createStarterFunction(targetDir: string) {
     console.log(chalk.green("✓ Starter function created (index.ts)"));
   } else {
     console.log(chalk.yellow("✓ index.ts already exists"));
+  }
+
+  const helperPath = join(targetDir, "stagehand.ts");
+  if (!existsSync(helperPath)) {
+    const templatePath = join(__dirname, "templates", "stagehand.ts.template");
+    copyFileSync(templatePath, helperPath);
+    console.log(chalk.green("✓ Stagehand helper created (stagehand.ts)"));
+  } else {
+    console.log(chalk.yellow("✓ stagehand.ts already exists"));
   }
 }
 
