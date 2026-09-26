@@ -129,6 +129,37 @@ defineFn(
 
 The `bb` CLI is included with the package.
 
+## Programmatic core
+
+CLI hosts can reuse the same scaffold, local-development, publishing, and
+invocation implementation without invoking the `bb` executable:
+
+```ts
+import {
+  invokeFunction,
+  publishFunction,
+} from "@browserbasehq/sdk-functions/core";
+
+const published = await publishFunction({
+  apiKey: process.env.BROWSERBASE_API_KEY,
+  entrypoint: "index.ts",
+});
+
+if (!published.dryRun) {
+  const functionId = published.build.builtFunctions?.[0]?.id;
+  if (functionId) {
+    const invocation = await invokeFunction({ functionId });
+    console.log(invocation.results);
+  }
+}
+```
+
+The core API returns typed values and throws `FunctionsCoreError`; it does not
+parse CLI arguments, format terminal output, install signal handlers, call
+`process.exit()`, or emit telemetry. Those concerns remain with the importing
+CLI. `startDevServer()` returns a handle with an idempotent `close()` method so
+the host owns its process lifecycle.
+
 | Command                   | Description                                                    |
 | ------------------------- | -------------------------------------------------------------- |
 | `bb init [project-name]`  | Scaffold a new project (defaults to `my-browserbase-function`) |

@@ -22,6 +22,9 @@ importers:
       dotenv:
         specifier: ^17.2.3
         version: 17.2.3
+      ignore:
+        specifier: ^7.0.5
+        version: 7.0.5
       tsx:
         specifier: ^4.20.5
         version: 4.20.5
