@@ -110,12 +110,10 @@ export async function init(options: InitOptions) {
     console.log(chalk.cyan("Next steps:"));
     console.log(chalk.gray("1. Navigate to your project:"));
     console.log(chalk.white(`   cd ${options.projectName}`));
-    console.log(
-      chalk.gray("2. Add your Browserbase and OpenAI API keys to .env"),
-    );
+    console.log(chalk.gray("2. Add your Browserbase API key to .env"));
     console.log(
       chalk.gray(
-        "3. Upload the Stagehand extension, then paste its ID into stagehand.ts:",
+        "3. Upload the Stagehand extension, then paste its ID into index.ts:",
       ),
     );
     console.log(
@@ -137,7 +135,7 @@ export async function init(options: InitOptions) {
     );
     console.log(
       chalk.gray(
-        "6. Create BROWSERBASE_API_KEY and OPENAI_API_KEY project secrets and attach them to the function:",
+        "6. Create a BROWSERBASE_API_KEY project secret and attach it to the function:",
       ),
     );
     console.log(
@@ -237,7 +235,7 @@ function installDependencies(
   console.log(chalk.gray("  Installing @browserbasehq/stagehand..."));
   runInstallCommand(`${installCmd} @browserbasehq/stagehand`, targetDir);
 
-  // Two zod copies make schemas passed to Stagehand fail type checks, so match Stagehand's version.
+  // Match Stagehand's version of zod in order to pass type checks.
   const zodVersion = readStagehandZodVersion(targetDir);
   console.log(chalk.gray("  Installing zod..."));
   runInstallCommand(
@@ -339,15 +337,6 @@ function createStarterFunction(targetDir: string) {
     console.log(chalk.green("✓ Starter function created (index.ts)"));
   } else {
     console.log(chalk.yellow("✓ index.ts already exists"));
-  }
-
-  const helperPath = join(targetDir, "stagehand.ts");
-  if (!existsSync(helperPath)) {
-    const templatePath = join(__dirname, "templates", "stagehand.ts.template");
-    copyFileSync(templatePath, helperPath);
-    console.log(chalk.green("✓ Stagehand helper created (stagehand.ts)"));
-  } else {
-    console.log(chalk.yellow("✓ stagehand.ts already exists"));
   }
 }
 

@@ -27,14 +27,13 @@ pnpm dlx @browserbasehq/sdk-functions init my-project
 cd my-project
 ```
 
-Add your Browserbase and model API keys to `.env`:
+Add your Browserbase API key to `.env`:
 
 ```sh
 BROWSERBASE_API_KEY=your_api_key_here
-OPENAI_API_KEY=your_openai_api_key_here
 ```
 
-The starter function uses [Stagehand](https://docs.stagehand.dev), which needs its extension in the browser session. Upload the extension one time, then paste the returned `id` into `stagehandSessionConfig` in `stagehand.ts`:
+The starter function uses [Stagehand](https://docs.stagehand.dev), which needs its extension in the browser session. Upload the extension then paste the returned `id` into `extensionId` in `index.ts`:
 
 ```sh
 browse cloud extensions upload node_modules/@browserbasehq/stagehand/dist/assets/stagehand-extension.zip
@@ -52,7 +51,7 @@ When ready, publish to Browserbase:
 pnpm bb publish index.ts
 ```
 
-Then [attach your API keys as secrets](#secrets) to the published function.
+Then [attach your API key as a secret](#secrets) to the published function.
 
 ## Usage
 
@@ -68,32 +67,39 @@ defineFn("hello-world", async () => {
 
 ### Browser Automation
 
-Every function receives a `context` with a managed browser session. Drive it with Stagehand through the `withStagehand` helper that `bb init` creates in `stagehand.ts`:
+Every function receives a `context` with a managed browser session. Connect [Stagehand](https://docs.stagehand.dev) to it by session ID:
 
 ```ts
 import { defineFn } from "@browserbasehq/sdk-functions";
+import { browserbase, Stagehand } from "@browserbasehq/stagehand";
 import { z } from "zod/v4";
-
-import { stagehandSessionConfig, withStagehand } from "./stagehand.js";
 
 defineFn(
   "scrape-titles",
-  (context) =>
-    withStagehand(context, async ({ stagehand, page }) => {
-      await page.goto("https://news.ycombinator.com");
+  async (context) => {
+    const browser = await browserbase.connect({
+      // The local dev server has no secrets, so fall back to .env.
+      apiKey:
+        context.secrets.BROWSERBASE_API_KEY ?? process.env.BROWSERBASE_API_KEY!,
+      sessionId: context.session.id,
+    });
+    // In this example, Stagehand uses the Model Gateway where Browserbase charges for the tokens
+    const stagehand = await Stagehand.create({ browser });
+    const page = (await browser.context.activePage())!;
 
-      const { data } = await stagehand.extract(
-        "Extract the titles of the top 5 stories",
-        z.object({ titles: z.array(z.string()).max(5) }),
-      );
+    await page.goto("https://news.ycombinator.com");
+    const { data } = await stagehand.extract(
+      "Extract the titles of the top 5 stories",
+      z.object({ titles: z.array(z.string()).max(5) }),
+    );
 
-      return { titles: data.titles };
-    }),
-  { sessionConfig: stagehandSessionConfig },
+    await stagehand.close();
+    return { titles: data.titles };
+  },
+  // The ID from `browse cloud extensions upload`. Stagehand needs its extension in the session.
+  { sessionConfig: { extensionId: "your-extension-id" } },
 );
 ```
-
-`withStagehand` attaches Stagehand to the function's session with `browserbase.connect()`, and closes Stagehand when your code finishes. Browserbase releases the session when the invocation ends. Keep `stagehandSessionConfig` in every function's `sessionConfig`. It adds the Stagehand extension to the session.
 
 ### Parameter Validation
 
@@ -123,26 +129,32 @@ Pass `sessionConfig` to customize the browser session (uses the same options as 
 
 ```ts
 import { defineFn } from "@browserbasehq/sdk-functions";
+import { browserbase, Stagehand } from "@browserbasehq/stagehand";
 import { z } from "zod/v4";
-
-import { stagehandSessionConfig, withStagehand } from "./stagehand.js";
 
 defineFn(
   "stealth-scraper",
-  (context) =>
-    withStagehand(context, async ({ stagehand, page }) => {
-      await page.goto("https://example.com");
+  async (context) => {
+    const browser = await browserbase.connect({
+      apiKey:
+        context.secrets.BROWSERBASE_API_KEY ?? process.env.BROWSERBASE_API_KEY!,
+      sessionId: context.session.id,
+    });
+    const stagehand = await Stagehand.create({ browser });
+    const page = (await browser.context.activePage())!;
 
-      const { data } = await stagehand.extract(
-        "Extract the main text of the page",
-        z.object({ content: z.string() }),
-      );
+    await page.goto("https://example.com");
+    const { data } = await stagehand.extract(
+      "Extract the main text of the page",
+      z.object({ content: z.string() }),
+    );
 
-      return { content: data.content };
-    }),
+    await stagehand.close();
+    return { content: data.content };
+  },
   {
     sessionConfig: {
-      ...stagehandSessionConfig,
+      extensionId: "your-extension-id", // Stagehand's extension
       browserSettings: { advancedStealth: true },
     },
   },
@@ -151,17 +163,16 @@ defineFn(
 
 ### Secrets
 
-Keep API keys in encrypted project secrets. Each secret attached to a function is available as `context.secrets[name]`. The `withStagehand` helper reads `BROWSERBASE_API_KEY` and `OPENAI_API_KEY` this way.
+Keep API keys in encrypted project secrets. Each secret attached to a function is available as `context.secrets[name]`. The Stagehand examples read `BROWSERBASE_API_KEY` this way. They don't need a model API key: without a `model` option, Stagehand uses the [Browserbase Model Gateway](https://docs.stagehand.dev/v4/configuration/models#model-gateway), which picks a model for each call. Browserbase charges for the tokens.
 
-Create the secrets and attach them to the published function with the [`browse` CLI](https://www.npmjs.com/package/browse):
+Create the secret and attach it to the published function with the [`browse` CLI](https://www.npmjs.com/package/browse):
 
 ```sh
 browse cloud secrets create BROWSERBASE_API_KEY --env BROWSERBASE_API_KEY
-browse cloud secrets create OPENAI_API_KEY --env OPENAI_API_KEY
 browse functions secrets attach <functionId> <secretId>
 ```
 
-Use the function ID from `builtFunctions[].id` in the publish output. The local development server doesn't pass secrets, so `withStagehand` falls back to the values in `.env`.
+Use the Function ID from `builtFunctions[].id` in the publish output. The local development server doesn't pass secrets, so the examples fall back to the values in `.env`.
 
 ## CLI Reference
 
@@ -227,10 +238,9 @@ Options:
 
 Set variables in your environment or in a `.env` file for the CLI and the local development server. Deployed functions read them from [secrets](#secrets) instead.
 
-| Variable              | Required                       | Description                                 |
-| --------------------- | ------------------------------ | ------------------------------------------- |
-| `BROWSERBASE_API_KEY` | Yes                            | Your Browserbase API key                    |
-| `OPENAI_API_KEY`      | For the `withStagehand` helper | Your OpenAI API key for the Stagehand model |
+| Variable              | Required | Description              |
+| --------------------- | -------- | ------------------------ |
+| `BROWSERBASE_API_KEY` | Yes      | Your Browserbase API key |
 
 Get your API key from [browserbase.com](https://browserbase.com).
 

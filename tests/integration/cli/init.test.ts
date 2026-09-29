@@ -42,14 +42,16 @@ describe("Init Command", () => {
       existsSync(join(projectDir, "index.ts")),
       "index.ts should exist",
     );
-    assert.ok(
-      existsSync(join(projectDir, "stagehand.ts")),
-      "stagehand.ts should exist",
-    );
+    const starter = readFileSync(join(projectDir, "index.ts"), "utf-8");
     assert.doesNotMatch(
-      readFileSync(join(projectDir, "stagehand.ts"), "utf-8"),
+      starter,
       /await browser\.close\(\)/,
-      "stagehand.ts should not release the Function's session with browser.close()",
+      "index.ts should not release the Function's session with browser.close()",
+    );
+    assert.match(
+      starter,
+      /Stagehand\.create\(\{ browser \}\)/,
+      "index.ts should omit the model so the Model Gateway picks one",
     );
     assert.ok(existsSync(join(projectDir, ".env")), ".env should exist");
     assert.ok(
