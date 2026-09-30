@@ -1,0 +1,3 @@
+# pnpm 11 and later fail installs when esbuild's build script is not approved.
+allowBuilds:
+  esbuild: true

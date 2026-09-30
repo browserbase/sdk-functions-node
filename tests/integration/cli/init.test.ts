@@ -42,6 +42,17 @@ describe("Init Command", () => {
       existsSync(join(projectDir, "index.ts")),
       "index.ts should exist",
     );
+    const starter = readFileSync(join(projectDir, "index.ts"), "utf-8");
+    assert.doesNotMatch(
+      starter,
+      /await browser\.close\(\)/,
+      "index.ts should not release the Function's session with browser.close()",
+    );
+    assert.match(
+      starter,
+      /Stagehand\.create\(\{ browser \}\)/,
+      "index.ts should omit the model so the Model Gateway picks one",
+    );
     assert.ok(existsSync(join(projectDir, ".env")), ".env should exist");
     assert.ok(
       existsSync(join(projectDir, ".gitignore")),
@@ -54,6 +65,11 @@ describe("Init Command", () => {
     assert.ok(
       existsSync(join(projectDir, ".git")),
       ".git directory should exist",
+    );
+    assert.match(
+      readFileSync(join(projectDir, "pnpm-workspace.yaml"), "utf-8"),
+      /allowBuilds:\n {2}esbuild: true/,
+      "pnpm-workspace.yaml should allow the esbuild build script",
     );
   });
 
@@ -68,6 +84,11 @@ describe("Init Command", () => {
 
     const pkg = JSON.parse(readFileSync(pkgPath, "utf-8"));
     assert.equal(pkg.type, "module", 'Should have "type": "module"');
+    assert.equal(
+      pkg.devEngines,
+      undefined,
+      "Should not have devEngines, because npm rejects devEngines.packageManager set to pnpm",
+    );
 
     // Check dependencies include expected packages
     const allDeps = { ...pkg.dependencies, ...pkg.devDependencies };
@@ -75,8 +96,30 @@ describe("Init Command", () => {
       allDeps["@browserbasehq/sdk-functions"],
       "Should depend on @browserbasehq/sdk-functions",
     );
-    assert.ok(allDeps["playwright-core"], "Should depend on playwright-core");
+    assert.ok(
+      allDeps["@browserbasehq/stagehand"],
+      "Should depend on @browserbasehq/stagehand",
+    );
+
+    // zod must match Stagehand's version, so schemas passed to Stagehand type-check.
+    const stagehandPkg = JSON.parse(
+      readFileSync(
+        join(
+          dir,
+          projectName,
+          "node_modules",
+          "@browserbasehq",
+          "stagehand",
+          "package.json",
+        ),
+        "utf-8",
+      ),
+    );
     assert.ok(allDeps["zod"], "Should depend on zod");
+    assert.ok(
+      String(allDeps["zod"]).includes(stagehandPkg.dependencies.zod),
+      `zod (${allDeps["zod"]}) should match Stagehand's zod (${stagehandPkg.dependencies.zod})`,
+    );
   });
 
   it("rejects invalid project names", () => {
