@@ -4,6 +4,11 @@ import { FunctionRegistry } from "./runtime/registry.js";
 import { EnvironmentManager } from "./utils/env.js";
 
 export { defineFn } from "./define/index.js";
+export {
+  deleteFunction,
+  type DeleteFunctionOptions,
+  type DeleteFunctionResponse,
+} from "./delete/index.js";
 
 export const environmentManager = new EnvironmentManager(process.env);
 export const functionsRegistry = new FunctionRegistry();

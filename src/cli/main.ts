@@ -164,4 +164,22 @@ program
     }
   });
 
+program
+  .command("delete")
+  .description("Delete a deployed Browserbase Function")
+  .argument("<functionId>", "The function ID to delete")
+  .option("-u, --api-url <url>", "API endpoint URL")
+  .action(async (functionId, options) => {
+    try {
+      const { removeFunction } = await import("./delete/index.js");
+      await removeFunction({
+        functionId,
+        apiUrl: options.apiUrl,
+      });
+    } catch (error) {
+      console.error(chalk.red("Delete failed:"), error);
+      process.exit(1);
+    }
+  });
+
 program.parse();

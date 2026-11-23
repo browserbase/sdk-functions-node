@@ -178,12 +178,27 @@ Use the Function ID from `builtFunctions[].id` in the publish output. The local 
 
 The `bb` CLI is included with the package.
 
+## Programmatic deletion
+
+Delete a deployed function directly from the SDK:
+
+```ts
+import { deleteFunction } from "@browserbasehq/sdk-functions";
+
+const result = await deleteFunction({
+  apiKey: process.env.BROWSERBASE_API_KEY,
+  functionId: "function-id",
+});
+console.log(result.deleted);
+```
+
 | Command                   | Description                                                    |
 | ------------------------- | -------------------------------------------------------------- |
 | `bb init [project-name]`  | Scaffold a new project (defaults to `my-browserbase-function`) |
 | `bb dev <entrypoint>`     | Start a local development server                               |
 | `bb publish <entrypoint>` | Deploy your function to Browserbase                            |
 | `bb invoke <functionId>`  | Invoke a deployed function                                     |
+| `bb delete <functionId>`  | Delete a deployed function                                     |
 
 ### `bb init`
 
@@ -233,6 +248,19 @@ Options:
 - `--no-wait` — Don't wait for the invocation to complete
 - `--check-status <invocationId>` — Check the status of an existing invocation
 - `-u, --api-url <url>` — Custom API endpoint URL
+
+### `bb delete`
+
+```sh
+bb delete <functionId>
+```
+
+The command reports whether an active function was deleted. Deleting a missing
+or already-deleted function succeeds and reports that nothing was deleted.
+
+Options:
+
+- `-u, --api-url <url>` - Custom API endpoint URL
 
 ## Configuration
 
