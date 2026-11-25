@@ -78,8 +78,8 @@ describe("Build Flow", () => {
       type: "module",
       files: {
         "index.mjs": `
-import { defineFn } from "@browserbasehq/sdk-functions";
-if (typeof defineFn !== "function") {
+import { defineFn, deleteFunction } from "@browserbasehq/sdk-functions";
+if (typeof defineFn !== "function" || typeof deleteFunction !== "function") {
   process.exit(1);
 }
 console.log("ESM_OK");
@@ -102,7 +102,7 @@ console.log("ESM_OK");
       files: {
         "index.cjs": `
 const sdk = require("@browserbasehq/sdk-functions");
-if (typeof sdk.defineFn !== "function") {
+if (typeof sdk.defineFn !== "function" || typeof sdk.deleteFunction !== "function") {
   process.exit(1);
 }
 console.log("CJS_OK");
@@ -167,6 +167,14 @@ console.log("CJS_OK");
       String(output).trim().length > 0,
       "bb --version should produce output",
     );
+
+    const deleteHelp = execSync("npx bb delete --help", {
+      cwd: dir,
+      encoding: "utf-8",
+      env: { ...process.env },
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+    assert.match(String(deleteHelp), /bb delete \[options\] <functionId>/);
   });
 
   it("basic function: introspect works from installed package", () => {
